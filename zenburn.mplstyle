@@ -1,0 +1,39 @@
+# tasty alien fruit salad, from https://github.com/jnurmine/Zenburn
+#
+# Color References:
+#
+# Gray: #3F3F3F
+# Light Gray: #6F6F6F
+# White: #FFFFEF
+# Red: #CC9393
+# Green: #7F9F7F
+# Orange: #DFAF8F
+# Yellow: #F0DFAF
+# Cyan: #93E0E3
+# Blue: #8CD0D3
+# Dark Red: #A55D5D
+# Dark Green: #466F46
+# Dark Blue: #4A7274
+# Dark Orange: #A352E
+
+text.color: white
+
+legend.facecolor: 9F9F9F
+legend.fancybox: True
+legend.loc: best
+
+figure.figsize: [8,6]
+
+lines.color: 3F3F3F
+
+patch.facecolor: 466F46
+
+axes.grid: True
+axes.titlesize: 18
+axes.facecolor: CFCFCF
+axes.labelcolor: white
+axes.labelsize: 14
+axes.prop_cycle: cycler('color',['#A55D5D','#466F46','#4A7274','#3F3F3F','#A35E2E'])
+								  
+xtick.color: CFCFCF
+ytick.color: CFCFCF

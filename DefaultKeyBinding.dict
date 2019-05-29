@@ -1,0 +1,43 @@
+/* This file remaps the key bindings of a single user on macOS.
+
+NOTES:
+
+This file must be seen by macOS at ~/Library/KeyBindings/DefaultKeyBinding.dict
+
+Soft links are not seen by macOS; to store this somewhere other than
+~/Library/KeyBindings, do
+
+    $ ln /path/to/DefaultKeyBinding.dict ~/Library/KeyBindings/
+
+KEY CODES:
+
+Key Modifiers
+^ : Ctrl
+$ : Shift
+~ : Option (Alt)
+@ : Command (Apple)
+# : Numeric Keypad
+
+Non-Printable Key Codes
+
+Up Arrow:     \UF700        Backspace:    \UF7          F1:           \UF704
+Down Arrow:   \UF701        Tab:          \U0009        F2:           \UF705
+Left Arrow:   \UF702        Escape:       \U001B        F3:           \UF706
+Right Arrow:  \UF703        Enter:        \U000A        ...
+Insert:       \UF727        Page Up:      \UF72C
+Delete:       \UF728        Page Down:    \UF72D
+Home:         \UF729        Print Screen: \UF72E
+End:          \UF72B        Scroll Lock:  \UF72F
+Break:        \UF732        Pause:        \UF730
+SysReq:       \UF731        Menu:         \UF735
+Help:         \UF746
+
+*/
+
+{
+   "^\UF702" = "moveWordBackward:";
+   "^\UF703" = "moveWordForward:";
+   "^\U7F" = "deleteWordBackward:";
+   "^w" = "cut:";
+   "^y" = "paste:";
+}
