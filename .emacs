@@ -242,55 +242,43 @@
 
 (use-package yaml-mode)
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LATEX STUFF, AUCTEX, ETC ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; TODO wrap all this up into the use-package stuff
-
+;; I'm sure I would rewrite this using :hook, :mode, and so on, but I don't
+;; understand them well enough to be confident in that.
 (use-package tex
   :defer t
   :ensure auctex
   :init
   (setq exec-path (append exec-path '("/usr/texbin")))
-  (setq exec-path (append exec-path '("/Library/TeX/texbin"))))
-
-;; a bunch of default settings I want
-(setq TeX-parse-self t)
-(setq preview-auto-cache-preamble t)
-(setq TeX-save-query nil) ;; autosave before compiling
-(setq-default TeX-master nil)
-(add-hook 'LaTeX-mode-hook 'visual-line-mode)
-(add-hook 'LaTeX-mode-hook 'flyspell-mode)
-(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-(add-hook 'LaTeX-mode-hook 'auto-complete-mode)
-(setq reftex-plug-into-AUCTeX t)
-(setq TeX-PDF-mode t)
-
-(add-to-list 'auto-mode-alist '("\\.tex$" . LaTeX-mode)); force LaTeX-mode
-
-;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
-(add-hook 'LaTeX-mode-hook (lambda ()
-  (push
-    '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
-      :help "Run latexmk on file")
-    TeX-command-list)))
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-
-;; use Skim as default pdf viewer
-;; Skim's displayline is used for forward search (from .tex to .pdf)
-;; option -b highlights the current line; option -g opens Skim in the background  
-(setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
-(setq TeX-view-program-list
-     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
-
-;; start emacs in server mode so that skim can talk to it
-(server-start)
-
-;; (global-visual-line-mode 1)
-(setq preview-gs-command "/usr/local/bin/gs")
+  (setq exec-path (append exec-path '("/Library/TeX/texbin")))
+  (server-start) ;; so skim can talk to emacs
+  ;; a bunch of default settings I want
+  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (add-hook 'LaTeX-mode-hook 'auto-complete-mode)
+  (add-to-list 'auto-mode-alist '("\\.tex$" . LaTeX-mode)); force LaTeX-mode
+  ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
+  (add-hook 'LaTeX-mode-hook (lambda ()
+                               (push
+                                '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+                                  :help "Run latexmk on file")
+                                TeX-command-list)))
+  (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+  :custom
+  (TeX-parse-self t)
+  (preview-auto-cache-preamble t)
+  (TeX-save-query nil) ;; autosave before compiling
+  (TeX-master nil)
+  (reftex-plug-into-AUCTeX t)
+  (TeX-PDF-mode t)
+  ;; use Skim as default pdf viewer
+  ;; Skim's displayline is used for forward search (from .tex to .pdf)
+  ;; option -b highlights the current line; option -g opens Skim in the background  
+  (TeX-view-program-selection '((output-pdf "PDF Viewer")))
+  (TeX-view-program-list
+        '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+  (preview-gs-command "/usr/local/bin/gs"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
