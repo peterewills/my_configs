@@ -112,6 +112,14 @@
               tab-width 4
               fill-column 79)
 
+(show-paren-mode 1)
+(electric-pair-mode 1)
+;; don't pair single or double quotes. It doesn't work well in elpy.
+(setq electric-pair-inhibit-predicate
+      (lambda (c)
+        (if (or (char-equal c ?\") (char-equal c ?\'))
+            t (electric-pair-default-inhibit c))))
+
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -166,15 +174,6 @@
 (setq use-package-always-ensure t)
 
 
-;; make parens in pairs
-(use-package smartparens
-  :diminish smartparens-mode
-  :config
-  (progn
-    (require 'smartparens-config)
-    (smartparens-global-mode 1)
-    (show-paren-mode t)))
-
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet
   :custom
@@ -193,16 +192,53 @@
   (elpy-enable)
   (setenv "PATH" (concat (getenv "PATH") ":~/.local/bin"))
   (setq exec-path (append exec-path '("~/.local/bin")))
+  (add-hook 'python-mode-hook (lambda () (auto-complete-mode -1)))
   :custom
   (elpy-rpc-python-command
    "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
   (python-shell-interpreter
    "/Users/peterwills/.pyenv/versions/3.6.8/bin/python"))
 
-;; enable Interactively Do Things mode
-;; This mode does the interactive file search stuff
+;; I like this for find-file and kill-buffer.
 (use-package ido
   :init (ido-mode t))
+
+;; my use of helm is pretty limited - I still prefer ido for finding files &
+;; killing buffers. But I like helm-M-x, and helm-buffers-list. I pulled this
+;; config from somewhere on the interwebs, so lots of these keybindings I don't
+;; even know much about.
+(use-package helm
+  :diminish helm-mode
+  :init
+  (require 'helm-config)
+  (setq helm-candidate-number-limit 100)
+  (helm-mode)
+  :bind (("C-c h" . helm-mini)
+         ("C-h a" . helm-apropos)
+         ("C-x C-b" . helm-buffers-list)
+         ("C-x b" . helm-buffers-list)
+         ("M-y" . helm-show-kill-ring)
+         ("M-x" . helm-M-x)
+         ("C-x c o" . helm-occur)
+         ("C-x c s" . helm-swoop)
+         ("C-x c y" . helm-yas-complete)
+         ("C-x c Y" . helm-yas-create-snippet-on-region)
+         ("C-x c b" . my/helm-do-grep-book-notes)
+         ("C-x c SPC" . helm-all-mark-rings)
+         ;;("C-x C-f" . helm-find-files) ;; I prefer ido mode here
+         ))
+
+;; allows project-wide search & replace
+(use-package projectile
+  ;; Useful Commands:
+  ;;    C-c p s g  Run grep on the files in the project.    
+  ;;    C-c p r  Runs interactive query-replace on all files in the projects.    
+  ;;    C-c p C-h (shows all projectile bindings)
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :config 
+  (setq projectile-enable-caching t)
+  (setq projectile-switch-project-action 'projectile-dired))
+
 
 ;; Allows multiple cursors. Highlight region, then use C-S-c C-S-c.
 (use-package multiple-cursors
@@ -215,14 +251,8 @@
   :init (which-key-mode))
 
 ;; slice-image prevents scrolling issues in EIN. See
-;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. By
-;; default, ROWS=20, COLS=nil. To change, do something like
-;;
-;;   (setq ein:slice-image '(100 30)),
-;;
-;; which sets ROWS=100 & COLS=30.
-;;
-;; Bind clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
+;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
+;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
 ;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
 (use-package ein
   :custom
