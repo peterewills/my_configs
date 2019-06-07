@@ -156,6 +156,8 @@
 (require 'package) 
 (add-to-list 'package-archives
              '("melpa-stable" . "http://stable.melpa.org/packages/"))
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/"))
 (package-initialize)
 
 
@@ -179,6 +181,10 @@
   :custom
   (yas-snippet-dirs '("/Users/peterwills/.emacs.d/yasnippet-snippets/")))
 
+;; auto-completion for python
+(use-package jedi
+  :init (setq jedi:complete-on-dot t))
+
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, which
 ;; we installed just for the user. Why did we do that? Well, I forget.
 ;;
@@ -192,21 +198,41 @@
   (elpy-enable)
   (setenv "PATH" (concat (getenv "PATH") ":~/.local/bin"))
   (setq exec-path (append exec-path '("~/.local/bin")))
-  (add-hook 'python-mode-hook (lambda () (auto-complete-mode -1)))
+  (setenv "PATH" (concat (getenv "PATH") ":~/.pyenv/shims")) ;; pyenv pip installs stuff here
+  (setq exec-path (append exec-path '("~/.pyenv/shims")))
+  (add-hook 'python-mode-hook (company-mode -1)) ;; this interferes with jedi
+  (add-hook 'python-mode-hook #'jedi:setup)
   :custom
   (elpy-rpc-python-command
    "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
   (python-shell-interpreter
-   "/Users/peterwills/.pyenv/versions/3.6.8/bin/python"))
+   "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
+  (elpy-rpc-backend "jedi"))
+
+;; slice-image prevents scrolling issues in EIN. See
+;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
+;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
+;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
+;;
+;; I'd like to be able to use Jedi with EIN, but it doesn't seem to work. I
+;; think I'm using the right hook, and using #'jedi:setup works for elpy, and
+;; if I do M-x jedi:setup then it works in EIN... but adding the hook below
+;; doesn't get it going at startup.
+(use-package ein
+  :pin melpa
+  :init
+  (add-hook 'ein:connect-mode-hook #'jedi:setup)
+  :custom
+  (ein:completion-backend 'ein:use-ac-backend) ;; I'd prefer jedi...
+  (ein:truncate-long-cell-output nil)
+  (ein:slice-image t)
+  :bind
+  ("C-c C-x C-c" . ein:worksheet-clear-all-output))
 
 ;; I like this for find-file and kill-buffer.
 (use-package ido
   :init (ido-mode t))
 
-;; my use of helm is pretty limited - I still prefer ido for finding files &
-;; killing buffers. But I like helm-M-x, and helm-buffers-list. I pulled this
-;; config from somewhere on the interwebs, so lots of these keybindings I don't
-;; even know much about.
 (use-package helm
   :diminish helm-mode
   :init
@@ -225,7 +251,8 @@
          ("C-x c Y" . helm-yas-create-snippet-on-region)
          ("C-x c b" . my/helm-do-grep-book-notes)
          ("C-x c SPC" . helm-all-mark-rings)
-         ;;("C-x C-f" . helm-find-files) ;; I prefer ido mode here
+         ("C-x C-f" . helm-find-files)
+         ;; ("TAB" . helm-execute-persistent-action) ;; should give tab completion, but doesn't :(
          ))
 
 ;; allows project-wide search & replace
@@ -250,17 +277,6 @@
 (use-package which-key
   :init (which-key-mode))
 
-;; slice-image prevents scrolling issues in EIN. See
-;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
-;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
-;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
-(use-package ein
-  :custom
-  (ein:truncate-long-cell-output nil)
-  (ein:slice-image t)
-  :bind
-  ("C-c C-x C-c" . ein:worksheet-clear-all-output))
-
 ;; enable auto complete
 (use-package auto-complete
   :init (global-auto-complete-mode t)) 
@@ -269,7 +285,6 @@
   :custom (markdown-enable-math t))
 
 (use-package yaml-mode)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
