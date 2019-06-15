@@ -107,7 +107,8 @@
 (setq-default auto-fill-function 'do-auto-fill)
 
 
-;; change default tab spacing, and make sure to always use spaces
+;; change default tab spacing, and make sure to always use spaces. need to use
+;; -default since these variables are buffer-local
 (setq-default indent-tabs-mode nil
               tab-width 4
               fill-column 79)
@@ -146,6 +147,7 @@
 ;; cause I <3 comment boxes
 (global-set-key (kbd "C-c b b") 'comment-box)
 
+(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
 
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
@@ -160,6 +162,10 @@
              '("melpa" . "http://melpa.org/packages/"))
 (package-initialize)
 
+(defun add-to-exec-path (path)
+  ;; add a path to both exec-path and environment variable PATH
+  (setenv "PATH" (concat (getenv "PATH") (concat ":" path)))
+  (setq exec-path (append exec-path (cons path nil))))
 
 ;; It's best to use programmatic package specification so that this file can be
 ;; easily transferred between machines, and transparently contains all
@@ -175,6 +181,9 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
+(use-package diminish
+  :init
+  (diminish 'auto-fill-function))
 
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet
@@ -184,6 +193,13 @@
 ;; auto-completion for python
 (use-package jedi
   :init (setq jedi:complete-on-dot t))
+
+;; use C-c M-d to insert docstrings for functions
+(use-package sphinx-doc
+  :diminish sphinx-doc-mode
+  :init
+  (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
+  (setq sphinx-doc-all-arguments t))
 
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, which
 ;; we installed just for the user. Why did we do that? Well, I forget.
@@ -196,17 +212,16 @@
 (use-package elpy
   :init
   (elpy-enable)
-  (setenv "PATH" (concat (getenv "PATH") ":~/.local/bin"))
-  (setq exec-path (append exec-path '("~/.local/bin")))
-  (setenv "PATH" (concat (getenv "PATH") ":~/.pyenv/shims")) ;; pyenv pip installs stuff here
-  (setq exec-path (append exec-path '("~/.pyenv/shims")))
-  (add-hook 'python-mode-hook (company-mode -1)) ;; this interferes with jedi
-  (add-hook 'python-mode-hook #'jedi:setup)
+  (add-to-exec-path "~/.local/bin")
+  (add-to-exec-path "/usr/local/bin")
+  (add-hook 'elpy-mode-hook (lambda () (company-mode -1))) ;; this interferes with jedi
+  (add-hook 'elpy-mode-hook #'jedi:setup)
+  (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   :custom
   (elpy-rpc-python-command
-   "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
+   "/usr/local/bin/python3")
   (python-shell-interpreter
-   "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
+   "/usr/local/bin/python3")
   (elpy-rpc-backend "jedi"))
 
 ;; slice-image prevents scrolling issues in EIN. See
@@ -275,13 +290,13 @@
   :bind ("C-x g" . magit-status))
 
 (use-package which-key
+  :diminish which-key-mode
   :init (which-key-mode))
 
 ;; enable auto complete
 (use-package auto-complete
-  :init
-  (ac-config-default)
-  (global-auto-complete-mode t))
+  :diminish auto-complete-mode
+  :init (global-auto-complete-mode t))
 
 (use-package markdown-mode
   :custom (markdown-enable-math t))
