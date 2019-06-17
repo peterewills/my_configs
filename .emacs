@@ -35,8 +35,6 @@
 
 (setq user-full-name "Peter Wills"
       user-mail-address "peter.wills@stitchfix.com" inhibit-startup-message t ;; get rid of that picture at startup
-      initial-major-mode 'text-mode ;; just open a text buffer at first
-      initial-scratch-message "###########################################\n## Scratch buffer, will not be autosaved ##\n###########################################\n\n"
       ;; performance
       gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
       backup-directory-alist `((".*" . ,temporary-file-directory))
@@ -84,6 +82,16 @@
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
 
+;; automatically fill lines everywhere
+(setq-default auto-fill-function 'do-auto-fill)
+
+
+;; change default tab spacing, and make sure to always use spaces. need to use
+;; -default since these variables are buffer-local
+(setq-default indent-tabs-mode nil
+              tab-width 4
+              fill-column 79)
+
 (show-paren-mode 1)
 (electric-pair-mode 1)
 ;; don't pair single or double quotes. It doesn't work well in elpy.
@@ -118,6 +126,8 @@
 ;; cause I <3 comment boxes
 (global-set-key (kbd "C-c b b") 'comment-box)
 
+(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
+
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
@@ -130,6 +140,10 @@
              '("melpa" . "http://melpa.org/packages/"))
 (package-initialize)
 
+(defun add-to-exec-path (path)
+  ;; add a path to both exec-path and environment variable PATH
+  (setenv "PATH" (concat (getenv "PATH") (concat ":" path)))
+  (setq exec-path (append exec-path (cons path nil))))
 
 ;; It's best to use programmatic package specification so that this file can be
 ;; easily transferred between machines, and transparently contains all
@@ -145,6 +159,9 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
+(use-package diminish
+  :init
+  (diminish 'auto-fill-function))
 
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet
@@ -154,6 +171,13 @@
 ;; auto-completion for python
 (use-package jedi
   :init (setq jedi:complete-on-dot t))
+
+;; use C-c M-d to insert docstrings for functions
+(use-package sphinx-doc
+  :diminish sphinx-doc-mode
+  :init
+  (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
+  (setq sphinx-doc-all-arguments t))
 
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, which
 ;; we installed just for the user. Why did we do that? Well, I forget.
@@ -166,10 +190,8 @@
 (use-package elpy
   :init
   (elpy-enable)
-  (setenv "PATH" (concat (getenv "PATH") ":~/.local/bin"))
-  (setq exec-path (append exec-path '("~/.local/bin")))
-  (setenv "PATH" (concat (getenv "PATH") ":~/.pyenv/shims")) ;; pyenv pip installs stuff here
-  (setq exec-path (append exec-path '("~/.pyenv/shims")))
+  (add-to-exec-path "~/.local/bin")
+  (add-to-exec-path "~/.pyenv/shims")
   ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
   (add-hook 'elpy-mode-hook (lambda () (company-mode -1)))
   (add-hook 'python-mode-hook #'jedi:setup)
@@ -233,7 +255,7 @@
          ("C-x c SPC" . helm-all-mark-rings)
          ("C-x C-f" . helm-find-files)
          ;; the below should give tab completion, but doesn't :(
-         ;; ("TAB" . helm-execute-persistent-action) 
+         ("TAB" . helm-execute-persistent-action) 
          ))
 
 ;; allows project-wide search & replace
@@ -256,13 +278,13 @@
   :bind ("C-x g" . magit-status))
 
 (use-package which-key
-  :diminish which-key
+  :diminish which-key-mode
   :init (which-key-mode))
 
 ;; enable auto complete
 (use-package auto-complete
-  :diminish
-  :init (global-auto-complete-mode t)) 
+  :diminish auto-complete-mode
+  :init (global-auto-complete-mode t))
 
 (use-package markdown-mode
   :custom (markdown-enable-math t))
