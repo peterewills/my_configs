@@ -45,15 +45,6 @@
 (setq gc-cons-threshold 50000000)
 
 
-;; make scratch buffer be text mode instead of lisp-fill
-(setq initial-major-mode 'text-mode)
-(setq initial-scratch-message "###########################################
-## Scratch buffer, will not be autosaved ##
-###########################################
-
-")
-
-
 ;; add themes in .emacs.d/themes folder to list of themes, set zenburn as the
 ;; current theme. To get zenburn, do
 ;;
@@ -216,6 +207,7 @@
   (add-to-exec-path "/usr/local/bin")
   (add-hook 'elpy-mode-hook (lambda () (company-mode -1))) ;; this interferes with jedi
   (add-hook 'elpy-mode-hook #'jedi:setup)
+  ;; elpy turns on highligh-indentation-mode, so I have to diminish it after
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   :custom
   (elpy-rpc-python-command
@@ -232,7 +224,8 @@
 ;; I'd like to be able to use Jedi with EIN, but it doesn't seem to work. I
 ;; think I'm using the right hook, and using #'jedi:setup works for elpy, and
 ;; if I do M-x jedi:setup then it works in EIN... but adding the hook below
-;; doesn't get it going at startup.
+;; doesn't get it going at startup. Maybe it's cause I set the
+;; completion-backend which runs after the connect-mode-hook.
 (use-package ein
   :pin melpa
   :init
@@ -267,7 +260,7 @@
          ("C-x c b" . my/helm-do-grep-book-notes)
          ("C-x c SPC" . helm-all-mark-rings)
          ("C-x C-f" . helm-find-files)
-         ;; ("TAB" . helm-execute-persistent-action) ;; should give tab completion, but doesn't :(
+         ("TAB" . helm-execute-persistent-action) ;; should give tab completion, but doesn't :(
          ))
 
 ;; allows project-wide search & replace
