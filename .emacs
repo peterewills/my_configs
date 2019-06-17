@@ -33,25 +33,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; get rid of that picture at startup
-(setq inhibit-startup-message t)
-
-
 (setq user-full-name "Peter Wills"
-      user-mail-address "peter.wills@stitchfix.com")
+      user-mail-address "peter.wills@stitchfix.com" inhibit-startup-message t ;; get rid of that picture at startup
+      initial-major-mode 'text-mode ;; just open a text buffer at first
+      initial-scratch-message "###########################################\n## Scratch buffer, will not be autosaved ##\n###########################################\n\n"
+      ;; performance
+      gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
+      backup-directory-alist `((".*" . ,temporary-file-directory))
+      auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+      ;; input & interactionq
+      mouse-wheel-scroll-amount '(1 ((shift) . 1)) ;; one line at a time
+      mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
+      mouse-wheel-follow-mouse 't ;; scroll window under mouse
+      scroll-step 1 ;; keyboard scroll one line at a time
+      mac-command-modifier 'meta
+      vc-follow-symlinks t)
 
-
-;; increase threshold for garbage collection to 50 MB
-(setq gc-cons-threshold 50000000)
-
-
-;; make scratch buffer be text mode instead of lisp-fill
-(setq initial-major-mode 'text-mode)
-(setq initial-scratch-message "###########################################
-## Scratch buffer, will not be autosaved ##
-###########################################
-
-")
+;; use -default when variables are buffer-local 
+(setq-default truncate-lines t ;; truncate rather than wrap lines
+              auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
+              indent-tabs-mode nil ;; use spaces
+              tab-width 4 ;; always 4
+              fill-column 79) ;; PEP8 >_<  
 
 
 ;; add themes in .emacs.d/themes folder to list of themes, set zenburn as the
@@ -68,17 +71,6 @@
 (set-face-attribute 'default t :font "Menlo-14" )
 
 
-;; put backup files in the temporary-file-directory
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
-
-
-;; truncate rather than wrap lines
-(set-default 'truncate-lines t)
-
-
 ;; highlight current line
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "#000")
@@ -88,29 +80,9 @@
 (save-place-mode 1)
 
 
-;; bind cmd key to meta
-(setq mac-command-modifier 'meta)
-
-
-;; scroll one line at a time (less "jumpy" than defaults)
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-(setq scroll-step 1) ;; keyboard scroll one line at a time
-
-
 ;; kill toolbar
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
-
-;; automatically fill lines everywhere
-(setq-default auto-fill-function 'do-auto-fill)
-
-
-;; change default tab spacing, and make sure to always use spaces
-(setq-default indent-tabs-mode nil
-              tab-width 4
-              fill-column 79)
 
 (show-paren-mode 1)
 (electric-pair-mode 1)
@@ -146,17 +118,15 @@
 ;; cause I <3 comment boxes
 (global-set-key (kbd "C-c b b") 'comment-box)
 
-
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
 
 
-;; enable installation of packages from MELPA
 (require 'package) 
-(add-to-list 'package-archives
+(add-to-list 'package-archives ;; stable versions
              '("melpa-stable" . "http://stable.melpa.org/packages/"))
-(add-to-list 'package-archives
+(add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "http://melpa.org/packages/"))
 (package-initialize)
 
@@ -190,7 +160,7 @@
 ;;
 ;; For a fresh installation, you'll want to
 ;;
-;;   pip install flake8 jedi rope autopep8 black yapf.
+;;   pip install flake8 jedi autopep8 black yapf.
 ;;
 ;; This should get you full Elpy bells & whistles. Maybe install --user?
 (use-package elpy
@@ -200,13 +170,12 @@
   (setq exec-path (append exec-path '("~/.local/bin")))
   (setenv "PATH" (concat (getenv "PATH") ":~/.pyenv/shims")) ;; pyenv pip installs stuff here
   (setq exec-path (append exec-path '("~/.pyenv/shims")))
-  (add-hook 'python-mode-hook (company-mode -1)) ;; this interferes with jedi
+  ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
+  (add-hook 'elpy-mode-hook (lambda () (company-mode -1)))
   (add-hook 'python-mode-hook #'jedi:setup)
   :custom
-  (elpy-rpc-python-command
-   "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
-  (python-shell-interpreter
-   "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
+  (elpy-rpc-python-command "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
+  (python-shell-interpreter "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
   (elpy-rpc-backend "jedi"))
 
 ;; slice-image prevents scrolling issues in EIN. See
@@ -214,27 +183,38 @@
 ;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
 ;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
 ;;
-;; I'd like to be able to use Jedi with EIN, but it doesn't seem to work. I
-;; think I'm using the right hook, and using #'jedi:setup works for elpy, and
-;; if I do M-x jedi:setup then it works in EIN... but adding the hook below
-;; doesn't get it going at startup.
+;; I'd like to be able to use Jedi with EIN, but it doesn't seem to work.  For
+;; the jedi:setup hook, note that it gets triggered, but then it says
+;;
+;;   ein: [error] Symbol’s function definition is void: nil
+;;
+;; so for some reason that function isn't defined yet at that point? Seems
+;; strange - the same works fine as a python-mode-hook. Also, I should be able
+;; to specify ein:use-ac-jedi-backend and have it work, but when I try that,
+;; then neither auto-complete NOR jedi does anything. If I M-x jedi:setup in a
+;; notebook buffer, then it works alright (does some weird stuff like
+;; jedi-complete in markdown cells, but whatever).
+;;
+;; Also, it seems like the thing doesn't always run... maybe connect-mode-hoook
+;; isn't the hook I want.
 (use-package ein
   :pin melpa
   :init
   (add-hook 'ein:connect-mode-hook #'jedi:setup)
   :custom
-  (ein:completion-backend 'ein:use-ac-backend) ;; I'd prefer jedi...
+  (ein:completion-backend 'ein:use-ac-backend)
   (ein:truncate-long-cell-output nil)
   (ein:slice-image t)
   :bind
   ("C-c C-x C-c" . ein:worksheet-clear-all-output))
 
-;; I like this for find-file and kill-buffer.
+;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
+;; of cases.
 (use-package ido
   :init (ido-mode t))
 
 (use-package helm
-  :diminish helm-mode
+  :delight ;; don't show in mode-list
   :init
   (require 'helm-config)
   (setq helm-candidate-number-limit 100)
@@ -252,7 +232,8 @@
          ("C-x c b" . my/helm-do-grep-book-notes)
          ("C-x c SPC" . helm-all-mark-rings)
          ("C-x C-f" . helm-find-files)
-         ;; ("TAB" . helm-execute-persistent-action) ;; should give tab completion, but doesn't :(
+         ;; the below should give tab completion, but doesn't :(
+         ;; ("TAB" . helm-execute-persistent-action) 
          ))
 
 ;; allows project-wide search & replace
@@ -275,10 +256,12 @@
   :bind ("C-x g" . magit-status))
 
 (use-package which-key
+  :diminish which-key
   :init (which-key-mode))
 
 ;; enable auto complete
 (use-package auto-complete
+  :diminish
   :init (global-auto-complete-mode t)) 
 
 (use-package markdown-mode
