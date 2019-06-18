@@ -63,28 +63,22 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 (load-theme 'zenburn t)
 
-
 ;; set default font
 (add-to-list 'default-frame-alist '(font . "Menlo-14" ))
 (set-face-attribute 'default t :font "Menlo-14" )
-
 
 ;; highlight current line
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "#000")
 
-
 ;; save your place
 (save-place-mode 1)
-
 
 ;; kill toolbar
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
-
 ;; automatically fill lines everywhere
 (setq-default auto-fill-function 'do-auto-fill)
-
 
 ;; change default tab spacing, and make sure to always use spaces. need to use
 ;; -default since these variables are buffer-local
@@ -100,11 +94,9 @@
         (if (or (char-equal c ?\") (char-equal c ?\'))
             t (electric-pair-default-inhibit c))))
 
-
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
 ;;;;;;;;;;;;;;::;;;;;;;;;;;;
-
 
 ;; global bindings to comment and uncomment regions
 (global-set-key [?\C-x ?\C-/] 'comment-region)
@@ -131,7 +123,6 @@
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
-
 
 (require 'package) 
 (add-to-list 'package-archives ;; stable versions
@@ -194,6 +185,7 @@
   (add-to-exec-path "~/.pyenv/shims")
   ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
   (add-hook 'elpy-mode-hook (lambda () (company-mode -1)))
+  (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   (add-hook 'python-mode-hook #'jedi:setup)
   :custom
   (elpy-rpc-python-command "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
@@ -222,9 +214,10 @@
 (use-package ein
   :pin melpa
   :init
-  (add-hook 'ein:connect-mode-hook #'jedi:setup)
+  (add-hook 'ein:notebook-mode-hook #'jedi:setup)
   :custom
   (ein:completion-backend 'ein:use-ac-backend)
+  (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
   (ein:slice-image t)
   :bind
@@ -236,7 +229,7 @@
   :init (ido-mode t))
 
 (use-package helm
-  :delight ;; don't show in mode-list
+  :diminish helm-mode ;; don't show in mode-list
   :init
   (require 'helm-config)
   (setq helm-candidate-number-limit 100)
@@ -254,8 +247,6 @@
          ("C-x c b" . my/helm-do-grep-book-notes)
          ("C-x c SPC" . helm-all-mark-rings)
          ("C-x C-f" . helm-find-files)
-         ;; the below should give tab completion, but doesn't :(
-         ("TAB" . helm-execute-persistent-action) 
          ))
 
 ;; allows project-wide search & replace
