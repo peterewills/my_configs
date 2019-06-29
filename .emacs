@@ -34,7 +34,9 @@
 
 
 (setq user-full-name "Peter Wills"
-      user-mail-address "peter.wills@stitchfix.com" inhibit-startup-message t ;; get rid of that picture at startup
+      user-mail-address "peter.wills@stitchfix.com"
+      inhibit-startup-message t ;; get rid of that picture at startup
+      
       ;; performance
       gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
       backup-directory-alist `((".*" . ,temporary-file-directory))
@@ -52,7 +54,11 @@
               auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
               indent-tabs-mode nil ;; use spaces
               tab-width 4 ;; always 4
-              fill-column 79) ;; PEP8 >_<  
+              fill-column 79) ;; PEP8 >_<
+
+;; window should fill half the screen width-wise, and be full-height
+(add-to-list 'default-frame-alist '(width . 0.5))
+(add-to-list 'default-frame-alist '(height . 1.0))
 
 
 ;; add themes in .emacs.d/themes folder to list of themes, set zenburn as the
@@ -94,6 +100,13 @@
         (if (or (char-equal c ?\") (char-equal c ?\'))
             t (electric-pair-default-inhibit c))))
 
+(defun add-to-exec-path (path)
+  ;; add a path to both exec-path and environment variable PATH
+  (setenv "PATH" (concat (getenv "PATH") (concat ":" path)))
+  (setq exec-path (append exec-path (cons path nil))))
+
+(add-to-exec-path "/usr/local/bin")
+
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
 ;;;;;;;;;;;;;;::;;;;;;;;;;;;
@@ -120,6 +133,20 @@
 
 (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
 
+
+;;;;;;;;;;;;;;
+;; ORG MODE ;;
+;;;;;;;;;;;;;;
+
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+
+(setq org-log-done t
+      ;; indent rather than showing all the stars
+      org-startup-indented t 
+      org-agenda-files (list "~/org/work.org"
+                             "~/org/home.org"))
+
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
@@ -130,11 +157,6 @@
 (add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "http://melpa.org/packages/"))
 (package-initialize)
-
-(defun add-to-exec-path (path)
-  ;; add a path to both exec-path and environment variable PATH
-  (setenv "PATH" (concat (getenv "PATH") (concat ":" path)))
-  (setq exec-path (append exec-path (cons path nil))))
 
 ;; It's best to use programmatic package specification so that this file can be
 ;; easily transferred between machines, and transparently contains all
@@ -159,17 +181,6 @@
   :custom
   (yas-snippet-dirs '("/Users/peterwills/.emacs.d/yasnippet-snippets/")))
 
-;; auto-completion for python
-(use-package jedi
-  :init (setq jedi:complete-on-dot t))
-
-;; use C-c M-d to insert docstrings for functions
-(use-package sphinx-doc
-  :diminish sphinx-doc-mode
-  :init
-  (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
-  (setq sphinx-doc-all-arguments t))
-
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, which
 ;; we installed just for the user. Why did we do that? Well, I forget.
 ;;
@@ -184,9 +195,7 @@
   (add-to-exec-path "~/.local/bin")
   (add-to-exec-path "~/.pyenv/shims")
   ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
-  (add-hook 'elpy-mode-hook (lambda () (company-mode -1)))
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
-  (add-hook 'python-mode-hook #'jedi:setup)
   :custom
   (elpy-rpc-python-command "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
   (python-shell-interpreter "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
@@ -196,25 +205,10 @@
 ;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
 ;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
 ;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
-;;
-;; I'd like to be able to use Jedi with EIN, but it doesn't seem to work.  For
-;; the jedi:setup hook, note that it gets triggered, but then it says
-;;
-;;   ein: [error] Symbol’s function definition is void: nil
-;;
-;; so for some reason that function isn't defined yet at that point? Seems
-;; strange - the same works fine as a python-mode-hook. Also, I should be able
-;; to specify ein:use-ac-jedi-backend and have it work, but when I try that,
-;; then neither auto-complete NOR jedi does anything. If I M-x jedi:setup in a
-;; notebook buffer, then it works alright (does some weird stuff like
-;; jedi-complete in markdown cells, but whatever).
-;;
-;; Also, it seems like the thing doesn't always run... maybe connect-mode-hoook
-;; isn't the hook I want.
 (use-package ein
   :pin melpa
   :init
-  (add-hook 'ein:notebook-mode-hook #'jedi:setup)
+  (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   :custom
   (ein:completion-backend 'ein:use-ac-backend)
   (ein:complete-on-dot t)
@@ -228,6 +222,8 @@
 (use-package ido
   :init (ido-mode t))
 
+;; I don't use a lot of these keybindings, but I'm going to leave them in here
+;; so that I can dig into them later if I get curious.
 (use-package helm
   :diminish helm-mode ;; don't show in mode-list
   :init
@@ -268,6 +264,10 @@
 (use-package magit
   :bind ("C-x g" . magit-status))
 
+;; can't get this to work with stitchfix github repos
+(use-package forge
+  :after magit)
+
 (use-package which-key
   :diminish which-key-mode
   :init (which-key-mode))
@@ -275,12 +275,55 @@
 ;; enable auto complete
 (use-package auto-complete
   :diminish auto-complete-mode
-  :init (global-auto-complete-mode t))
+  :init
+  (ac-config-default)
+  (global-auto-complete-mode t)
+  ;; no company in elpy
+  (add-hook 'elpy-mode-hook (lambda () (company-mode -1))))
+
+;; auto-completion for python
+(use-package jedi
+  :init
+  (add-hook 'python-mode-hook 'jedi:setup)
+  (add-hook 'python-mode-hook 'jedi:ac-setup)
+  (setq jedi:complete-on-dot t)
+  ;; sometimes jedi isn't on, so make a global kbd for use with elpy and ein
+  (global-set-key (kbd "C-x C-j") 'jedi:setup))
 
 (use-package markdown-mode
   :custom (markdown-enable-math t))
 
 (use-package yaml-mode)
+
+;; lololol
+(use-package nyan-mode
+  :init (add-hook 'find-file-hook 'nyan-mode))
+
+;; sql-presto mode needed some fixups and stuff, so I'm just using my own local
+;; fork directly instead of the one on MELPA
+(add-to-list 'load-path "~/.emacs.d/lisp/sql-presto.el/")
+(require 'sql-presto)
+;; configs to connect to SF's presto server
+(setq sql-server "presto.vertigo.stitchfix.com")
+(setq sql-database "hive")
+;; make it easy to connect a buffer to an interactive presto session
+(global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
+(define-key sql-mode-map (kbd "M-P") 'sql-prestofy-buffer)
+;; we'd like to add a sql-prestofy-buffer hook for sql-mode, but that prevents
+;; the initial window from ever opening! How to fix?
+
+;; Sphinx-doc.el. Cloned from github and stuck it in ~/.emacs.d/ cause I made
+;; some modifications that I want to have. If/when those get merged back into
+;; the package itself, I'll install this from MELPA.
+;;
+;; To use, do C-c M-d to insert docstrings for functions
+(add-to-list 'load-path "~/.emacs.d/lisp/sphinx-doc.el/")
+(require 'sphinx-doc)
+(diminish 'sphinx-doc-mode)
+(add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
+(setq sphinx-doc-all-arguments t)
+(setq sphinx-doc-include-types t)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -293,12 +336,19 @@
  '(custom-safe-themes
    (quote
     ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
+ '(org-agenda-files (quote ("~/org/work.org")))
  '(package-selected-packages
    (quote
-    (yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
+    (nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; OPEN MY ORG FILE AT STARTUP ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(find-file "~/org/work.org")
