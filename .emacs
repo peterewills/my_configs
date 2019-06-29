@@ -301,7 +301,7 @@
 
 ;; sql-presto mode needed some fixups and stuff, so I'm just using my own local
 ;; fork directly instead of the one on MELPA
-(add-to-list 'load-path "~/.emacs.d/lisp/sql-presto.el/")
+(add-to-list 'load-path "~/.emacs.d/lisp/sql-prestodb/src/")
 (require 'sql-presto)
 ;; configs to connect to SF's presto server
 (setq sql-server "presto.vertigo.stitchfix.com")
