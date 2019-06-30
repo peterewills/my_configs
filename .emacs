@@ -60,15 +60,6 @@
 (add-to-list 'default-frame-alist '(width . 0.5))
 (add-to-list 'default-frame-alist '(height . 1.0))
 
-
-;; add themes in .emacs.d/themes folder to list of themes, set zenburn as the
-;; current theme. To get zenburn, do
-;;
-;;  curl https://raw.githubusercontent.com/bbatsov/zenburn-emacs/master/zenburn-theme.el \
-;;    > ~/.emacs.d/themes/zenburn-theme.el
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'zenburn t)
-
 ;; set default font
 (add-to-list 'default-frame-alist '(font . "Menlo-14" ))
 (set-face-attribute 'default t :font "Menlo-14" )
@@ -83,17 +74,9 @@
 ;; kill toolbar
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
-;; automatically fill lines everywhere
-(setq-default auto-fill-function 'do-auto-fill)
-
-;; change default tab spacing, and make sure to always use spaces. need to use
-;; -default since these variables are buffer-local
-(setq-default indent-tabs-mode nil
-              tab-width 4
-              fill-column 79)
-
 (show-paren-mode 1)
 (electric-pair-mode 1)
+
 ;; don't pair single or double quotes. It doesn't work well in elpy.
 (setq electric-pair-inhibit-predicate
       (lambda (c)
@@ -101,11 +84,14 @@
             t (electric-pair-default-inhibit c))))
 
 (defun add-to-exec-path (path)
-  ;; add a path to both exec-path and environment variable PATH
+  "Add a path to both exec-path and environment variable PATH"
   (setenv "PATH" (concat (getenv "PATH") (concat ":" path)))
   (setq exec-path (append exec-path (cons path nil))))
 
+;; I should really think through where I want to put my binaries and get them
+;; all in one place...
 (add-to-exec-path "/usr/local/bin")
+(add-to-exec-path "~/.local/bin")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -172,6 +158,11 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
+;; alien fruit salad ++
+(use-package zenburn-theme
+  :init
+  (load-theme 'zenburn t))
+
 (use-package diminish
   :init
   (diminish 'auto-fill-function))
@@ -181,18 +172,17 @@
   :custom
   (yas-snippet-dirs '("/Users/peterwills/.emacs.d/yasnippet-snippets/")))
 
-;; We have to add ~/.local/bin to the path so that elpy can see flake8, which
-;; we installed just for the user. Why did we do that? Well, I forget.
+;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
+;; other python-based binaries which are installed via --user.
 ;;
 ;; For a fresh installation, you'll want to
 ;;
-;;   pip install flake8 jedi autopep8 black yapf.
+;;   pip install flake8 jedi autopep8 yapf
 ;;
-;; This should get you full Elpy bells & whistles. Maybe install --user?
+;; This should get you full Elpy bells & whistles.
 (use-package elpy
   :init
   (elpy-enable)
-  (add-to-exec-path "~/.local/bin")
   (add-to-exec-path "~/.pyenv/shims")
   ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
@@ -210,7 +200,7 @@
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   :custom
-  (ein:completion-backend 'ein:use-ac-backend)
+  (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
   (ein:slice-image t)
@@ -245,7 +235,7 @@
          ("C-x C-f" . helm-find-files)
          ))
 
-;; allows project-wide search & replace
+;; Project-wide search & replace
 (use-package projectile
   ;; Useful Commands:
   ;;    C-c p s g  Run grep on the files in the project.    
@@ -299,8 +289,13 @@
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
-;; sql-presto mode needed some fixups and stuff, so I'm just using my own local
-;; fork directly instead of the one on MELPA
+;;;;;;;;;;;;;;;;;;;;
+;; LOCAL PACKAGES ;;
+;;;;;;;;;;;;;;;;;;;;
+
+;; SQL-PRESTO ;;
+
+;; Fixed some typos and added a couple features relative to the MELPA version.
 (add-to-list 'load-path "~/.emacs.d/lisp/sql-prestodb/src/")
 (require 'sql-presto)
 ;; configs to connect to SF's presto server
@@ -312,11 +307,10 @@
 ;; we'd like to add a sql-prestofy-buffer hook for sql-mode, but that prevents
 ;; the initial window from ever opening! How to fix?
 
-;; Sphinx-doc.el. Cloned from github and stuck it in ~/.emacs.d/ cause I made
-;; some modifications that I want to have. If/when those get merged back into
-;; the package itself, I'll install this from MELPA.
-;;
-;; To use, do C-c M-d to insert docstrings for functions
+;; SPHINX-DOC ;;
+
+;; Included support for type-hints. Do C-c M-d to insert docstrings for
+;; functions.
 (add-to-list 'load-path "~/.emacs.d/lisp/sphinx-doc.el/")
 (require 'sphinx-doc)
 (diminish 'sphinx-doc-mode)
