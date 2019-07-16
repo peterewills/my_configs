@@ -33,20 +33,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(setq user-full-name "Peter Wills"
-      user-mail-address "peter.wills@stitchfix.com"
-      inhibit-startup-message t ;; get rid of that picture at startup
+(setq inhibit-startup-message t ;; get rid of that picture at startup
       
       ;; performance
       gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
       backup-directory-alist `((".*" . ,temporary-file-directory))
       auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+
       ;; input & interactionq
       mouse-wheel-scroll-amount '(1 ((shift) . 1)) ;; one line at a time
       mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
       mouse-wheel-follow-mouse 't ;; scroll window under mouse
       scroll-step 1 ;; keyboard scroll one line at a time
       mac-command-modifier 'meta
+      ring-bell-function 'ignore ;; no more annoying boop
       vc-follow-symlinks t)
 
 ;; use -default when variables are buffer-local 
@@ -75,13 +75,16 @@
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
 (show-paren-mode 1)
-(electric-pair-mode 1)
 
-;; don't pair single or double quotes. It doesn't work well in elpy.
-(setq electric-pair-inhibit-predicate
-      (lambda (c)
-        (if (or (char-equal c ?\") (char-equal c ?\'))
-            t (electric-pair-default-inhibit c))))
+;; Still can't decide if I actually want this or not - it's honestly kind of
+;; annoying sometimes.
+;; (electric-pair-mode 1)
+
+;; ;; don't pair single or double quotes. It doesn't work well in elpy.
+;; (setq electric-pair-inhibit-predicate
+;;       (lambda (c)
+;;         (if (or (char-equal c ?\") (char-equal c ?\'))
+;;             t (electric-pair-default-inhibit c))))
 
 (defun add-to-exec-path (path)
   "Add a path to both exec-path and environment variable PATH"
@@ -104,9 +107,9 @@
 ;; quick toggle for auto-fill mode, sometimes I don't want it
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 
-;; I don't use C-b to to navigate text, so reset it to delete-indentation,
-;; which I use a fair bit
-(global-set-key (kbd "C-b") 'delete-indentation)
+;; bind this, cause I use it quite a lot. This overrides mark-page, but I don't
+;; use that much, so it's fine.
+(global-set-key (kbd "C-x C-p") 'delete-indentation)
 
 ;; use regex search by default, but expose non-regex search
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)
@@ -119,19 +122,20 @@
 
 (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
 
+;; dired - use C-j and C-l to go down and up the filetree, mimicing helm. Don't
+;; pop open new buffers when you do this - use dired-find-alternate-file
+;; instead of dired-find-file.
+(eval-after-load "dired"
+  '(progn
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (define-key dired-mode-map (kbd "C-l")
+                  (lambda () (interactive) (find-alternate-file "..")))))
+     (put 'dired-find-alternate-file 'disabled nil)
+     (define-key dired-mode-map (kbd "C-j") 'dired-find-alternate-file)
+     (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+     ))
 
-;;;;;;;;;;;;;;
-;; ORG MODE ;;
-;;;;;;;;;;;;;;
-
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
-
-(setq org-log-done t
-      ;; indent rather than showing all the stars
-      org-startup-indented t 
-      org-agenda-files (list "~/org/work.org"
-                             "~/org/home.org"))
 
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
@@ -153,10 +157,11 @@
 (eval-when-compile
   (require 'use-package))
 
-;; always install packages if they are not present. This means we don't have to
-;; add :ensure t to every use-package declaration
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
+;; Since we have both melpa and melpa-stable in our package-archives, we
+;; shouldn't just :ensure these things. Cause then we might get the nightly
+;; github builds from melpa, instead of the releases from melpa-stable. So, if
+;; you want to install a new package, use package-list-packages to get the
+;; version you want manually.
 
 ;; alien fruit salad ++
 (use-package zenburn-theme
@@ -232,8 +237,7 @@
          ("C-x c Y" . helm-yas-create-snippet-on-region)
          ("C-x c b" . my/helm-do-grep-book-notes)
          ("C-x c SPC" . helm-all-mark-rings)
-         ("C-x C-f" . helm-find-files)
-         ))
+         ("C-x C-f" . helm-find-files)))
 
 ;; Project-wide search & replace
 (use-package projectile
@@ -289,6 +293,32 @@
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
+;; to blacken stuff, do M-x blacken-buffer. Don't do it automatically just
+;; yet. We might eventually want this, but only for certain projects.
+(use-package blacken)
+
+(use-package treemacs
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-projectile
+  :after treemacs projectile)
+
+(use-package treemacs-magit
+  :after treemacs magit)
+
+;; cute icons for dired
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :config
+  (treemacs-icons-dired-mode))
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; LOCAL PACKAGES ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -318,6 +348,88 @@
 (setq sphinx-doc-all-arguments t)
 (setq sphinx-doc-include-types t)
 
+;;;;;;;;;;;;;;
+;; ORG MODE ;;
+;;;;;;;;;;;;;;
+
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(setq org-log-done t
+      org-cycle-separator-lines -1 ;; don't collapse blank lines
+      ;; indent rather than showing all the stars
+      org-startup-indented t 
+      org-agenda-files (list "~/Dropbox/org/work.org"
+                             "~/Dropbox/org/home.org"))
+
+;; we want tex in our org stuffs! and it needs to not be tiny.
+(add-to-exec-path "/Library/TeX/texbin")
+
+(defun org-preview-all-latex-fragments ()
+  (interactive)
+  (org-preview-latex-fragment 16))
+
+(defun org-increase-latex-preview-scale (scale)
+  (interactive "nScale latex previews to: ")
+  (setq org-format-latex-options
+        (plist-put org-format-latex-options :scale scale)))
+
+;; for some reason, this doesn't result in fragments being shown when I open an
+;; org-mode buffer. Maybe I'm previewing them too early, or something like that.
+(add-hook 'org-mode-hook 'org-preview-all-latex-fragments)
+(add-hook 'org-mode-hook (lambda () (org-increase-latex-preview-scale 1.5)))
+
+;; Run/highlight code using babel in org-mode
+(use-package ob-ipython
+  :init
+  ;; Fix an incompatibility between the ob-async and ob-ipython packages
+  (setq ob-async-no-async-languages-alist '("ipython"))
+  (setq ob-ipython-command "~/.pyenv/shims/ipython"))
+
+(defun org-insert-ipython-block ()
+  "Insert a code block for ipython, which uses the default session, and outputs
+  the results to a drawer for inline plotting."
+  (interactive)
+  (insert "
+#+BEGIN_SRC ipython :async t :results drawer :session
+  
+#+END_SRC
+")
+  (forward-line -2)
+  (goto-char (line-end-position)))
+
+(defun org-insert-ipython-imports-block ()
+  "Insert the usual imports, so that we don't have to type them over and over"
+  (interactive)
+  (insert "
+#+BEGIN_SRC ipython :session
+  import numpy as np
+  import pandas as pd
+  from matplotlib import pyplot as plt
+  %matplotlib inline
+#+END_SRC
+")
+  (forward-line -2)
+  (goto-char (line-end-position)))
+
+(define-key org-mode-map (kbd "C-c i p") 'org-insert-ipython-block)
+(define-key org-mode-map (kbd "C-c i i") 'org-insert-ipython-imports-block)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (python . t)
+   (ipython . t)
+   (shell . t)
+   (emacs-lisp . t)
+   ;; Include other languages here...
+   ))
+;; Syntax highlight in #+BEGIN_SRC blocks
+(setq org-src-fontify-natively t)
+;; Don't prompt before running code in org
+(setq org-confirm-babel-evaluate nil)
+
+(diminish 'org-indent-mode)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -330,10 +442,10 @@
  '(custom-safe-themes
    (quote
     ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
- '(org-agenda-files (quote ("~/org/work.org")))
+ '(org-agenda-files (quote ("~/Dropbox/org/work.org")))
  '(package-selected-packages
    (quote
-    (nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
+    (ob-sh ob-ipython treemacs treemacs-magit treemacs-projectile blacken-mode nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -345,4 +457,5 @@
 ;; OPEN MY ORG FILE AT STARTUP ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(find-file "~/org/work.org")
+(find-file "~/Dropbox/org/work.org")
+
