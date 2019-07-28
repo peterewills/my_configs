@@ -29,9 +29,8 @@
 
 
 (setq user-full-name "Peter Wills"
-      user-mail-address "peter.wills@stitchfix.com"
+      user-mail-address "peter.e.wills@gmail.com"
       inhibit-startup-message t ;; get rid of that picture at startup
-      
       ;; performance
       gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
       backup-directory-alist `((".*" . ,temporary-file-directory))
@@ -69,14 +68,14 @@
 ;; kill toolbar
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
-(show-paren-mode 1)
-(electric-pair-mode 1)
+;; (show-paren-mode 1)
+;; (electric-pair-mode 1)
 
-;; don't pair single or double quotes. It doesn't work well in elpy.
-(setq electric-pair-inhibit-predicate
-      (lambda (c)
-        (if (or (char-equal c ?\") (char-equal c ?\'))
-            t (electric-pair-default-inhibit c))))
+;; ;; don't pair single or double quotes. It doesn't work well in elpy.
+;; (setq electric-pair-inhibit-predicate
+;;       (lambda (c)
+;;         (if (or (char-equal c ?\") (char-equal c ?\'))
+;;             t (electric-pair-default-inhibit c))))
 
 (defun add-to-exec-path (path)
   "Add a path to both exec-path and environment variable PATH"
@@ -125,8 +124,8 @@
 (setq org-log-done t
       ;; indent rather than showing all the stars
       org-startup-indented t 
-      org-agenda-files (list "~/org/work.org"
-                             "~/org/home.org"))
+      org-agenda-files (list "~/Dropbox/org/work.org"
+                             "~/Dropbox/org/home.org"))
 
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
@@ -226,8 +225,7 @@
          ("C-x c Y" . helm-yas-create-snippet-on-region)
          ("C-x c b" . my/helm-do-grep-book-notes)
          ("C-x c SPC" . helm-all-mark-rings)
-         ("C-x C-f" . helm-find-files)
-         ))
+         ("C-x C-f" . helm-find-files)))
 
 ;; Project-wide search & replace
 (use-package projectile
@@ -362,4 +360,4 @@
 ;; OPEN MY ORG FILE AT STARTUP ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (find-file "~/org/work.org")
+(find-file "~/Dropbox/org/home.org")
