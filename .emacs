@@ -78,13 +78,13 @@
 
 ;; Still can't decide if I actually want this or not - it's honestly kind of
 ;; annoying sometimes.
-;; (electric-pair-mode 1)
+(electric-pair-mode 1)
 
-;; ;; don't pair single or double quotes. It doesn't work well in elpy.
-;; (setq electric-pair-inhibit-predicate
-;;       (lambda (c)
-;;         (if (or (char-equal c ?\") (char-equal c ?\'))
-;;             t (electric-pair-default-inhibit c))))
+;; don't pair single or double quotes. It doesn't work well in elpy.
+(setq electric-pair-inhibit-predicate
+      (lambda (c)
+        (if (or (char-equal c ?\") (char-equal c ?\'))
+            t (electric-pair-default-inhibit c))))
 
 (defun add-to-exec-path (path)
   "Add a path to both exec-path and environment variable PATH"
@@ -134,8 +134,7 @@
      (put 'dired-find-alternate-file 'disabled nil)
      (define-key dired-mode-map (kbd "C-j") 'dired-find-alternate-file)
      (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
-     ))
-
+     (setq dired-listing-switches "-alFh")))
 
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
@@ -154,6 +153,7 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
 (eval-when-compile
   (require 'use-package))
 
@@ -173,9 +173,7 @@
   (diminish 'auto-fill-function))
 
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
-(use-package yasnippet
-  :custom
-  (yas-snippet-dirs '("/Users/peterwills/.emacs.d/yasnippet-snippets/")))
+(use-package yasnippet)
 
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
 ;; other python-based binaries which are installed via --user.
@@ -192,8 +190,8 @@
   ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   :custom
-  (elpy-rpc-python-command "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
-  (python-shell-interpreter "/Users/peterwills/.pyenv/versions/3.6.8/bin/python")
+  (elpy-rpc-python-command "~/.pyenv/versions/3.6.8/bin/python")
+  (python-shell-interpreter "~/.pyenv/versions/3.6.8/bin/python")
   (elpy-rpc-backend "jedi"))
 
 ;; slice-image prevents scrolling issues in EIN. See
@@ -204,6 +202,11 @@
   :pin melpa
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
+  :config
+  (add-hook 'find-file-hook ;; open files as ipython notebooks automagically
+            (lambda ()
+              (when (eq major-mode 'ein:ipynb-mode)
+                (call-interactively #'ein:process-find-file-callback))))
   :custom
   (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
   (ein:complete-on-dot t)
@@ -225,18 +228,10 @@
   (require 'helm-config)
   (setq helm-candidate-number-limit 100)
   (helm-mode)
-  :bind (("C-c h" . helm-mini)
-         ("C-h a" . helm-apropos)
-         ("C-x C-b" . helm-buffers-list)
+  :bind (("C-x C-b" . helm-buffers-list)
          ("C-x b" . helm-buffers-list)
          ("M-y" . helm-show-kill-ring)
          ("M-x" . helm-M-x)
-         ("C-x c o" . helm-occur)
-         ("C-x c s" . helm-swoop)
-         ("C-x c y" . helm-yas-complete)
-         ("C-x c Y" . helm-yas-create-snippet-on-region)
-         ("C-x c b" . my/helm-do-grep-book-notes)
-         ("C-x c SPC" . helm-all-mark-rings)
          ("C-x C-f" . helm-find-files)))
 
 ;; Project-wide search & replace
@@ -257,10 +252,6 @@
 
 (use-package magit
   :bind ("C-x g" . magit-status))
-
-;; can't get this to work with stitchfix github repos
-(use-package forge
-  :after magit)
 
 (use-package which-key
   :diminish which-key-mode
@@ -292,32 +283,6 @@
 ;; lololol
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
-
-;; to blacken stuff, do M-x blacken-buffer. Don't do it automatically just
-;; yet. We might eventually want this, but only for certain projects.
-(use-package blacken)
-
-(use-package treemacs
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
-
-(use-package treemacs-projectile
-  :after treemacs projectile)
-
-(use-package treemacs-magit
-  :after treemacs magit)
-
-;; cute icons for dired
-(use-package treemacs-icons-dired
-  :after treemacs dired
-  :config
-  (treemacs-icons-dired-mode))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; LOCAL PACKAGES ;;
@@ -352,8 +317,9 @@
 ;; ORG MODE ;;
 ;;;;;;;;;;;;;;
 
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
+(define-key global-map (kbd "C-c l") 'org-store-link)
+(define-key global-map (kbd "C-c a") 'org-agenda)
+
 (setq org-log-done t
       org-cycle-separator-lines -1 ;; don't collapse blank lines
       ;; indent rather than showing all the stars
@@ -365,64 +331,64 @@
 (add-to-exec-path "/Library/TeX/texbin")
 
 (defun org-preview-all-latex-fragments ()
+  "Preview all latex fragments in a buffer."
   (interactive)
   (org-preview-latex-fragment 16))
 
 (defun org-increase-latex-preview-scale (scale)
+  "Rescale latex previews in a buffer. The usual scaling is tiny."
   (interactive "nScale latex previews to: ")
   (setq org-format-latex-options
         (plist-put org-format-latex-options :scale scale)))
 
-;; for some reason, this doesn't result in fragments being shown when I open an
-;; org-mode buffer. Maybe I'm previewing them too early, or something like that.
+;; neither of these work. I think the org-mode-hook runs too early, or
+;; something like that.
 (add-hook 'org-mode-hook 'org-preview-all-latex-fragments)
 (add-hook 'org-mode-hook (lambda () (org-increase-latex-preview-scale 1.5)))
 
-;; Run/highlight code using babel in org-mode
+;; Run/highlight code using babel in org-mode. see dzop/emacs-jupyter for an
+;; alternative, maybe more responsive to issues?  Could submit something about
+;; image slicing there.
+;;
+;; Also good to be aware that this slows startup down by a couple seconds.
 (use-package ob-ipython
   :init
   ;; Fix an incompatibility between the ob-async and ob-ipython packages
   (setq ob-async-no-async-languages-alist '("ipython"))
   (setq ob-ipython-command "~/.pyenv/shims/ipython"))
 
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (ipython . t)
+   (shell . t)
+   (emacs-lisp . t)))
+
 (defun org-insert-ipython-block ()
   "Insert a code block for ipython, which uses the default session, and outputs
   the results to a drawer for inline plotting."
   (interactive)
-  (insert "
-#+BEGIN_SRC ipython :async t :results drawer :session
+  (insert "#+BEGIN_SRC ipython :async t :results drawer :session
   
-#+END_SRC
-")
+#+END_SRC")
   (forward-line -2)
   (goto-char (line-end-position)))
 
 (defun org-insert-ipython-imports-block ()
   "Insert the usual imports, so that we don't have to type them over and over"
   (interactive)
-  (insert "
-#+BEGIN_SRC ipython :session
+  (insert "#+BEGIN_SRC ipython :session
   import numpy as np
   import pandas as pd
   from matplotlib import pyplot as plt
   %matplotlib inline
-#+END_SRC
-")
+#+END_SRC")
   (forward-line -2)
   (goto-char (line-end-position)))
 
 (define-key org-mode-map (kbd "C-c i p") 'org-insert-ipython-block)
 (define-key org-mode-map (kbd "C-c i i") 'org-insert-ipython-imports-block)
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (python . t)
-   (ipython . t)
-   (shell . t)
-   (emacs-lisp . t)
-   ;; Include other languages here...
-   ))
 ;; Syntax highlight in #+BEGIN_SRC blocks
 (setq org-src-fontify-natively t)
 ;; Don't prompt before running code in org
@@ -445,7 +411,7 @@
  '(org-agenda-files (quote ("~/Dropbox/org/work.org")))
  '(package-selected-packages
    (quote
-    (ob-sh ob-ipython treemacs treemacs-magit treemacs-projectile blacken-mode nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
+    (realgud sqlup-mode jupyter ob-sh ob-ipython treemacs treemacs-magit treemacs-projectile blacken-mode nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
