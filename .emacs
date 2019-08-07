@@ -48,7 +48,7 @@
               auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
               indent-tabs-mode nil ;; use spaces
               tab-width 4 ;; always 4
-              fill-column 79) ;; PEP8 >_<
+              fill-column 88)
 
 ;; window should fill half the screen width-wise, and be full-height
 (add-to-list 'default-frame-alist '(width . 0.5))
@@ -68,14 +68,14 @@
 ;; kill toolbar
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
-;; (show-paren-mode 1)
-;; (electric-pair-mode 1)
+(show-paren-mode 1)
+(electric-pair-mode 1)
 
-;; ;; don't pair single or double quotes. It doesn't work well in elpy.
-;; (setq electric-pair-inhibit-predicate
-;;       (lambda (c)
-;;         (if (or (char-equal c ?\") (char-equal c ?\'))
-;;             t (electric-pair-default-inhibit c))))
+;; don't pair single or double quotes. It doesn't work well in elpy.
+(setq electric-pair-inhibit-predicate
+      (lambda (c)
+        (if (or (char-equal c ?\") (char-equal c ?\'))
+            t (electric-pair-default-inhibit c))))
 
 (defun add-to-exec-path (path)
   "Add a path to both exec-path and environment variable PATH"
@@ -100,7 +100,7 @@
 
 ;; I don't use C-b to to navigate text, so reset it to delete-indentation,
 ;; which I use a fair bit
-(global-set-key (kbd "C-b") 'delete-indentation)
+(global-set-key (kbd "C-x C-p") 'delete-indentation)
 
 ;; use regex search by default, but expose non-regex search
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)
@@ -136,6 +136,8 @@
              '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives
+             '("gnu" . "http://elpa.gnu.org/packages/"))
 (package-initialize)
 
 ;; It's best to use programmatic package specification so that this file can be
@@ -148,9 +150,10 @@
   (require 'use-package))
 
 ;; always install packages if they are not present. This means we don't have to
-;; add :ensure t to every use-package declaration
+;; add :ensure t to every use-package declaration. Use stable versions by default
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+(setq use-package-always-pin "melpa-stable")
 
 ;; alien fruit salad ++
 (use-package zenburn-theme
@@ -188,17 +191,26 @@
 ;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
 ;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
 ;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
+;;
+;; right now my EIN config is badly broken. For example, it throws the
+;; exception:
+;;
+;;  Symbol's value as variable is void: ess-microsoft-p.
+;;
+;; Then, if I try to change bufffers, or M-x, or do anything really, it
+;; complains that ein:notebook-mode is void. I commented out these lines, and
+;; yet the ein commands still appear in my helm M-x list. Weird.
+;;
 (use-package ein
-  :pin melpa
-  :init
-  (add-hook 'ein:notebook-mode-hook 'jedi:setup)
-  :custom
-  (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
-  (ein:complete-on-dot t)
-  (ein:truncate-long-cell-output nil)
-  (ein:slice-image t)
-  :bind
-  ("C-c C-x C-c" . ein:worksheet-clear-all-output))
+ :init
+ (add-hook 'ein:notebook-mode-hook 'jedi:setup)
+ :custom
+ (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
+ (ein:complete-on-dot t)
+ (ein:truncate-long-cell-output nil)
+ (ein:slice-image t)
+ :bind
+ ("C-c C-x C-c" . ein:worksheet-clear-all-output))
 
 ;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
 ;; of cases.
@@ -246,10 +258,6 @@
 (use-package magit
   :bind ("C-x g" . magit-status))
 
-;; can't get this to work with stitchfix github repos
-(use-package forge
-  :after magit)
-
 (use-package which-key
   :diminish which-key-mode
   :init (which-key-mode))
@@ -285,8 +293,8 @@
   :defer t
   :ensure auctex
   :init
-  (setq exec-path (append exec-path '("/usr/texbin")))
-  (setq exec-path (append exec-path '("/Library/TeX/texbin")))
+  (add-to-exec-path "/usr/texbin")
+  (add-to-exec-path "/Library/TeX/texbin")
   (server-start) ;; so skim can talk to emacs
   ;; a bunch of default settings I want
   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
@@ -345,10 +353,10 @@
  '(custom-safe-themes
    (quote
     ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
- '(org-agenda-files (quote ("~/org/work.org")) t)
+ '(org-agenda-files (quote ("~/org/work.org")))
  '(package-selected-packages
    (quote
-    (nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
+    (polymode nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
