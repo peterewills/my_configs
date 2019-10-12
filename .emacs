@@ -54,7 +54,7 @@
               auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
               indent-tabs-mode nil ;; use spaces
               tab-width 4 ;; always 4
-              fill-column 79) ;; PEP8 >_<
+              fill-column 88) ;; PEP8 >_<
 
 ;; window should fill half the screen width-wise, and be full-height
 (add-to-list 'default-frame-alist '(width . 0.5))
@@ -107,6 +107,9 @@
 ;; quick toggle for auto-fill mode, sometimes I don't want it
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 
+;; I use this one so much that I wanted to make it easier
+(global-set-key (kbd "C-o") 'other-window)
+
 ;; bind this, cause I use it quite a lot. This overrides mark-page, but I don't
 ;; use that much, so it's fine.
 (global-set-key (kbd "C-x C-p") 'delete-indentation)
@@ -145,6 +148,8 @@
              '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives
+             '("gnu" . "http://elpa.gnu.org/packages/"))
 (package-initialize)
 
 ;; It's best to use programmatic package specification so that this file can be
@@ -153,9 +158,14 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
 (eval-when-compile
   (require 'use-package))
+
+;; always install packages if they are not present. This means we don't have to
+;; add :ensure t to every use-package declaration. Use stable versions by default
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+(setq use-package-always-pin "melpa-stable")
 
 ;; Since we have both melpa and melpa-stable in our package-archives, we
 ;; shouldn't just :ensure these things. Cause then we might get the nightly
@@ -176,23 +186,35 @@
 (use-package yasnippet)
 
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
-;; other python-based binaries which are installed via --user.
+;; other python-based binaries which are installed via --user. Also note that we're
+;; installing from a local clone of a fork, cause it has cold folding, which is shiny.
 ;;
 ;; For a fresh installation, you'll want to
 ;;
 ;;   pip install flake8 jedi autopep8 yapf
 ;;
 ;; This should get you full Elpy bells & whistles.
+;;
+;; If you're building this fresh, then you should probably just remove the ensure &
+;; load-path lines so that you install elpy from MELPA. I had to do some merging
+;; shenannigans to get code folding to play nice - the repo @ .emacs.d/lisp/elpy now has
+;; code folding in master, but it would take a bit to recreate that if wasn't already
+;; around.
 (use-package elpy
+  :ensure nil
+  :load-path "~/.emacs.d/lisp/elpy"
   :init
   (elpy-enable)
   (add-to-exec-path "~/.pyenv/shims")
-  ;; needs to be an elpy mode hook so that it runs AFTER elpy starts up
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
+  (add-hook 'elpy-mode-hook 'elpy-folding-hide-leafs)
   :custom
   (elpy-rpc-python-command "~/.pyenv/versions/3.6.8/bin/python")
   (python-shell-interpreter "~/.pyenv/versions/3.6.8/bin/python")
-  (elpy-rpc-backend "jedi"))
+  (elpy-rpc-backend "jedi")
+  :bind
+  ;; should come up with a quick hs-show-all kbd
+  ("C-<tab>" . hs-toggle-hiding))
 
 ;; slice-image prevents scrolling issues in EIN. See
 ;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
@@ -212,6 +234,7 @@
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
   (ein:slice-image t)
+  (ein:polymode t)
   :bind
   ("C-c C-x C-c" . ein:worksheet-clear-all-output))
 
@@ -226,7 +249,8 @@
   :diminish helm-mode ;; don't show in mode-list
   :init
   (require 'helm-config)
-  (setq helm-candidate-number-limit 100)
+  (setq helm-candidate-number-limit 100
+        helm-buffer-max-length 40)
   (helm-mode)
   :bind (("C-x C-b" . helm-buffers-list)
          ("C-x b" . helm-buffers-list)
@@ -272,7 +296,7 @@
   (add-hook 'python-mode-hook 'jedi:setup)
   (add-hook 'python-mode-hook 'jedi:ac-setup)
   (setq jedi:complete-on-dot t)
-  ;; sometimes jedi isn't on, so make a global kbd for use with elpy and ein
+  ;; make a global kbd for use with elpy and ein to make sure jedi is on
   (global-set-key (kbd "C-x C-j") 'jedi:setup))
 
 (use-package markdown-mode
@@ -284,11 +308,19 @@
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
+;; github-flavored markdown previews using C-c C-c g
+(use-package grip-mode
+  :ensure t
+  :bind (:map markdown-mode-command-map
+         ("g" . grip-mode)))
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; LOCAL PACKAGES ;;
 ;;;;;;;;;;;;;;;;;;;;
 
 ;; SQL-PRESTO ;;
+
+;; had some trouble getting this to play nice with use-package and local-path. Oh well.
 
 ;; Fixed some typos and added a couple features relative to the MELPA version.
 (add-to-list 'load-path "~/.emacs.d/lisp/sql-prestodb/src/")
@@ -306,12 +338,26 @@
 
 ;; Included support for type-hints. Do C-c M-d to insert docstrings for
 ;; functions.
-(add-to-list 'load-path "~/.emacs.d/lisp/sphinx-doc.el/")
-(require 'sphinx-doc)
-(diminish 'sphinx-doc-mode)
-(add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
-(setq sphinx-doc-all-arguments t)
-(setq sphinx-doc-include-types t)
+;;
+;; TODO Add support for "updating" docstrings, when more arguments are added.
+(use-package sphinx-doc
+  :ensure nil
+  :load-path "~/.emacs.d/lisp/sphinx-doc.el/"
+  :init
+  (diminish 'sphinx-doc-mode)
+  (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
+  :custom
+  (sphinx-doc-all-arguments t)
+  (sphinx-doc-include-types t))
+
+;; OX-JEKYLL-LITE ;;
+
+;; markdown exporter for org mode that plays nice with jekyll
+(use-package ox-jekyll-lite
+  :ensure nil
+  :load-path "~/.emacs.d/lisp/ox-jekyll-lite/"
+  :custom
+  (org-jekyll-project-root "~/code/jekyll/peterewills.github.io"))
 
 ;;;;;;;;;;;;;;
 ;; ORG MODE ;;
@@ -323,7 +369,8 @@
 (setq org-log-done t
       org-cycle-separator-lines -1 ;; don't collapse blank lines
       ;; indent rather than showing all the stars
-      org-startup-indented t 
+      org-startup-indented t
+      org-hide-emphasis-markers t ;; don't show stars for bold, or whatever.
       org-agenda-files (list "~/Dropbox/org/work.org"
                              "~/Dropbox/org/home.org"))
 
@@ -346,23 +393,39 @@
 (add-hook 'org-mode-hook 'org-preview-all-latex-fragments)
 (add-hook 'org-mode-hook (lambda () (org-increase-latex-preview-scale 1.5)))
 
-;; Run/highlight code using babel in org-mode. see dzop/emacs-jupyter for an
-;; alternative, maybe more responsive to issues?  Could submit something about
-;; image slicing there.
+
+;; Somehow I can't get this to work. I manually copied the ob-ipython to .emacs.d/elpa
+;; and it still doesn't like it.
 ;;
-;; Also good to be aware that this slows startup down by a couple seconds.
-(use-package ob-ipython
-  :init
-  ;; Fix an incompatibility between the ob-async and ob-ipython packages
-  (setq ob-async-no-async-languages-alist '("ipython"))
-  (setq ob-ipython-command "~/.pyenv/shims/ipython"))
+;; If I get excited about code execution in org mode anytime soon, just install
+;; emacs-jupyter (just called 'jupyter' in MELPA) and use that instead.
+
+;; ;; Run/highlight code using babel in org-mode. see dzop/emacs-jupyter for an
+;; ;; alternative, maybe more responsive to issues?  Could submit something about
+;; ;; image slicing there.
+;; ;;
+;; ;; Also good to be aware that this slows startup down by a couple seconds.
+;; (use-package ob-ipython
+;;   :init
+;;   ;; Fix an incompatibility between the ob-async and ob-ipython packages
+;;   (setq ob-async-no-async-languages-alist '("ipython"))
+;;   (setq ob-ipython-command "~/.pyenv/shims/ipython"))
 
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)
-   (ipython . t)
+;;   (ipython . t)
    (shell . t)
    (emacs-lisp . t)))
+
+(defun org-insert-sql-block ()
+  "Insert a code block for sql."
+  (interactive)
+  (insert "#+BEGIN_SRC sql
+  
+#+END_SRC")
+  (forward-line -2)
+  (goto-char (line-end-position)))
 
 (defun org-insert-ipython-block ()
   "Insert a code block for ipython, which uses the default session, and outputs
@@ -387,6 +450,7 @@
   (goto-char (line-end-position)))
 
 (define-key org-mode-map (kbd "C-c i p") 'org-insert-ipython-block)
+(define-key org-mode-map (kbd "C-c i s") 'org-insert-sql-block)
 (define-key org-mode-map (kbd "C-c i i") 'org-insert-ipython-imports-block)
 
 ;; Syntax highlight in #+BEGIN_SRC blocks
@@ -395,7 +459,6 @@
 (setq org-confirm-babel-evaluate nil)
 
 (diminish 'org-indent-mode)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -408,10 +471,9 @@
  '(custom-safe-themes
    (quote
     ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
- '(org-agenda-files (quote ("~/Dropbox/org/work.org")))
  '(package-selected-packages
    (quote
-    (realgud sqlup-mode jupyter ob-sh ob-ipython treemacs treemacs-magit treemacs-projectile blacken-mode nyan-mode yaml-mode which-key use-package smartparens multiple-cursors magit elpy ein))))
+    (zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode smartparens realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
