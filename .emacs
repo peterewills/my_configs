@@ -120,9 +120,31 @@
 (global-set-key (kbd "C-M-s") 'isearch-forward)
 (global-set-key (kbd "C-M-r") 'isearch-backward)
 
+;; hideshow mode, rebind map to C-c h. Hiding levels still doesn't do quite what I want,
+;; but I'm working on it :)
+(defun hs-hide-n-levels ()
+  "Interacitve hide-levels, prompting the user for number of
+levels to hide."
+  (interactive)
+  (hs-hide-level
+   (string-to-number
+    (read-string "Enter levels to hide: "))))
+
+(global-set-key (kbd "C-<tab>") 'hs-toggle-hiding)
+(global-set-key (kbd "C-c h b") 'hs-hide-block)
+(global-set-key (kbd "C-c h s") 'hs-show-block)
+(global-set-key (kbd "C-c h h") 'hs-hide-all)
+(global-set-key (kbd "C-c h a") 'hs-show-all)
+(global-set-key (kbd "C-c h n") 'hs-hide-n-levels)
+(global-set-key (kbd "C-c h 1") (lambda () (interactive) (hs-hide-level 1)))
+(global-set-key (kbd "C-c h 2") (lambda () (interactive) (hs-hide-level 2)))
+(global-set-key (kbd "C-c h 3") (lambda () (interactive) (hs-hide-level 3)))
+
+
 ;; cause I <3 comment boxes
 (global-set-key (kbd "C-c b b") 'comment-box)
 
+;; configure elisp mode
 (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
 
 ;; dired - use C-j and C-l to go down and up the filetree, mimicing helm. Don't
@@ -194,27 +216,38 @@
 ;;   pip install flake8 jedi autopep8 yapf
 ;;
 ;; This should get you full Elpy bells & whistles.
+
+;; ;; installing elpy from github repo in .emacs.d/lisp/
+;; (use-package elpy
+;;   :load-path "~/.emacs.d/lisp/elpy/"
+;;   :init
+;;   (add-to-exec-path "~/.pyenv/shims")
+;;   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
+;;   :custom
+;;   (elpy-rpc-python-command "~/.pyenv/versions/3.6.8/bin/python")
+;;   (python-shell-interpreter "~/.pyenv/versions/3.6.8/bin/python")
+;;   (elpy-rpc-backend "jedi")
+;;   :bind
+;;   ("C-c h b" . 'elpy-folding-hide-at-point) ;; python-specific hide-block
+;;   ("C-c h l" . 'elpy-folding-hide-leafs))
+;; ;; no idea why this comes up as not defined if it's in :init...
+;; (elpy-enable)
+
+;; config for MELPA version of elpy - keep around just in case.
 ;;
-;; If you're building this fresh, then you should probably just remove the ensure &
-;; load-path lines so that you install elpy from MELPA. I had to do some merging
-;; shenannigans to get code folding to play nice - the repo @ .emacs.d/lisp/elpy now has
-;; code folding in master, but it would take a bit to recreate that if wasn't already
-;; around.
 (use-package elpy
-  :ensure nil
-  :load-path "~/.emacs.d/lisp/elpy"
   :init
   (elpy-enable)
   (add-to-exec-path "~/.pyenv/shims")
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
-  (add-hook 'elpy-mode-hook 'elpy-folding-hide-leafs)
+  (add-hook 'elpy-mode-hook (lambda () (hs-minor-mode)))
   :custom
   (elpy-rpc-python-command "~/.pyenv/versions/3.6.8/bin/python")
   (python-shell-interpreter "~/.pyenv/versions/3.6.8/bin/python")
-  (elpy-rpc-backend "jedi")
-  :bind
-  ;; should come up with a quick hs-show-all kbd
-  ("C-<tab>" . hs-toggle-hiding))
+  (elpy-rpc-backend "jedi"))
+
+(use-package blacken
+  :load-path "~/.emacs.d/lisp/blacken/")
 
 ;; slice-image prevents scrolling issues in EIN. See
 ;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
@@ -234,7 +267,7 @@
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
   (ein:slice-image t)
-  (ein:polymode t)
+  ;; (ein:polymode t) ;; this is too buggy to use, and slows things down a ton
   :bind
   ("C-c C-x C-c" . ein:worksheet-clear-all-output))
 
