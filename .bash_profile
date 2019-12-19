@@ -16,7 +16,8 @@ export LS_ALL=en_US.utf-8
 export LANG=en_US.utf-8
 
 # Opens emacs in a separate window (so I have all my nice keybindings etc)
-alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs "$@"']
+alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs "$@"'
+alias run_compare_backfills_notebook='python /Users/peterwills/code/stitchfix/jyn-backtest/scripts/run_compare_backfills_notebook.py'
 
 #############################
 ### ENVIRONMENT VARIABLES ###

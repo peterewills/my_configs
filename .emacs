@@ -34,7 +34,7 @@
 
 
 (setq inhibit-startup-message t ;; get rid of that picture at startup
-      
+
       ;; performance
       gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
       backup-directory-alist `((".*" . ,temporary-file-directory))
@@ -49,7 +49,7 @@
       ring-bell-function 'ignore ;; no more annoying boop
       vc-follow-symlinks t)
 
-;; use -default when variables are buffer-local 
+;; use -default when variables are buffer-local
 (setq-default truncate-lines t ;; truncate rather than wrap lines
               auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
               indent-tabs-mode nil ;; use spaces
@@ -70,6 +70,9 @@
 
 ;; save your place
 (save-place-mode 1)
+
+;; kill trailing whitespace on save
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 ;; kill toolbar
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -106,6 +109,7 @@
 
 ;; quick toggle for auto-fill mode, sometimes I don't want it
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
+(global-set-key (kbd "C-c e") 'electric-pair-mode)
 
 ;; I use this one so much that I wanted to make it easier
 (global-set-key (kbd "C-o") 'other-window)
@@ -165,7 +169,7 @@ levels to hide."
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
 
-(require 'package) 
+(require 'package)
 (add-to-list 'package-archives ;; stable versions
              '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (add-to-list 'package-archives ;; nightly builds from GitHub
@@ -198,7 +202,8 @@ levels to hide."
 ;; alien fruit salad ++
 (use-package zenburn-theme
   :init
-  (load-theme 'zenburn t))
+  (load-theme 'zenburn t)
+  (set-face-attribute 'region nil :background "#6F6F6F"))
 
 (use-package diminish
   :init
@@ -294,11 +299,11 @@ levels to hide."
 ;; Project-wide search & replace
 (use-package projectile
   ;; Useful Commands:
-  ;;    C-c p s g  Run grep on the files in the project.    
-  ;;    C-c p r  Runs interactive query-replace on all files in the projects.    
+  ;;    C-c p s g  Run grep on the files in the project.
+  ;;    C-c p r  Runs interactive query-replace on all files in the projects.
   ;;    C-c p C-h (shows all projectile bindings)
   :bind-keymap ("C-c p" . projectile-command-map)
-  :config 
+  :config
   (setq projectile-enable-caching t)
   (setq projectile-switch-project-action 'projectile-dired))
 
@@ -361,6 +366,8 @@ levels to hide."
 ;; configs to connect to SF's presto server
 (setq sql-server "presto.vertigo.stitchfix.com")
 (setq sql-database "hive")
+;; run presto via this special SF thing to work with Presto-Guard
+(setq sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar")
 ;; make it easy to connect a buffer to an interactive presto session
 (global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
 (define-key sql-mode-map (kbd "M-P") 'sql-prestofy-buffer)
@@ -455,7 +462,7 @@ levels to hide."
   "Insert a code block for sql."
   (interactive)
   (insert "#+BEGIN_SRC sql
-  
+
 #+END_SRC")
   (forward-line -2)
   (goto-char (line-end-position)))
@@ -465,7 +472,7 @@ levels to hide."
   the results to a drawer for inline plotting."
   (interactive)
   (insert "#+BEGIN_SRC ipython :async t :results drawer :session
-  
+
 #+END_SRC")
   (forward-line -2)
   (goto-char (line-end-position)))
@@ -519,4 +526,3 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (find-file "~/Dropbox/org/work.org")
-
