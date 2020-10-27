@@ -41,11 +41,35 @@ parse_git_branch() {
 export PS1="\[\033[96m\]\W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 
+
+#################################
+### SUPERCHARGED BASH HISTORY ###
+#################################
+
+# https://metaredux.com/posts/2020/07/07/supercharge-your-bash-history.html
+
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+# append and reload the history after each command
+PROMPT_COMMAND="history -a; history -n"
+
+# ignore certain commands from the history
+HISTIGNORE="ls:ll:cd:pwd:bg:fg:history"
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=100000
+HISTFILESIZE=10000000
+
+
 #############
 ### OTHER ###
 #############
 
-# pyenv initialization                                                                                                                                                                                                                                                       
+# pyenv initialization
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"

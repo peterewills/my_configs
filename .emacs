@@ -47,7 +47,11 @@
       scroll-step 1 ;; keyboard scroll one line at a time
       mac-command-modifier 'meta
       ring-bell-function 'ignore ;; no more annoying boop
-      vc-follow-symlinks t)
+      vc-follow-symlinks t
+
+      ;; exiting emacs
+      confirm-kill-emacs 'yes-or-no-p
+      confirm-kill-processes nil)
 
 ;; use -default when variables are buffer-local
 (setq-default truncate-lines t ;; truncate rather than wrap lines
@@ -94,10 +98,19 @@
   (setenv "PATH" (concat (getenv "PATH") (concat ":" path)))
   (setq exec-path (append exec-path (cons path nil))))
 
+
+(defun prefix-to-exec-path (path)
+  "Add a path to both exec-path and environment variable PATH"
+  (setenv "PATH" (concat (concat path ":") (getenv "PATH")))
+  (setq exec-path (cons path exec-path)))
+
 ;; I should really think through where I want to put my binaries and get them
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
 (add-to-exec-path "~/.local/bin")
+;; we prefix this to the path to guarantee that the python that gets used is the one
+;; defined by pyenv, not /usr/bin/python
+(prefix-to-exec-path "~/.pyenv/shims")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -146,7 +159,12 @@ levels to hide."
 
 
 ;; cause I <3 comment boxes
-(global-set-key (kbd "C-c b b") 'comment-box)
+(global-set-key (kbd "C-c c b") 'comment-box)
+
+;; I want these to work both in python mode and in EIN, so I'll just set them as
+;; global. This way they can even work in org code snippets, or markdown, or whatever
+(global-set-key (kbd "C-c b b") 'python-black)
+(global-set-key (kbd "C-c b r") 'python-black-region)
 
 ;; configure elisp mode
 (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
@@ -170,12 +188,12 @@ levels to hide."
 ;;;;;;;;;;;;;;
 
 (require 'package)
-(add-to-list 'package-archives ;; stable versions
-             '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "http://melpa.org/packages/"))
 (add-to-list 'package-archives
              '("gnu" . "http://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives ;; "stable" versions - sometimes not actually updated
+             '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (package-initialize)
 
 ;; It's best to use programmatic package specification so that this file can be
@@ -209,8 +227,23 @@ levels to hide."
   :init
   (diminish 'auto-fill-function))
 
+(use-package expand-region
+  :bind
+  ("C-=" . er/expand-region)
+  ("C--" . er/contract-region))
+
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet)
+
+(use-package super-save
+  :ensure t
+  :config
+  (super-save-mode +1)
+  (add-to-list 'super-save-triggers 'switch-to-buffer)
+  (add-to-list 'super-save-triggers 'other-window)
+  :custom
+  (super-save-auto-save-when-idle t)
+  (auto-save-default nil))
 
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
 ;; other python-based binaries which are installed via --user. Also note that we're
@@ -246,20 +279,42 @@ levels to hide."
   (add-to-exec-path "~/.pyenv/shims")
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   (add-hook 'elpy-mode-hook (lambda () (hs-minor-mode)))
+  (add-hook 'elpy-mode-hook (lambda () (auto-fill-mode)))
   :custom
-  (elpy-rpc-python-command "~/.pyenv/versions/3.6.8/bin/python")
-  (python-shell-interpreter "~/.pyenv/versions/3.6.8/bin/python")
+  (elpy-rpc-python-command "~/.pyenv/versions/3.7.8/bin/python")
+  (python-shell-interpreter "~/.pyenv/versions/3.7.8/bin/python")
   (elpy-rpc-backend "jedi"))
 
-(use-package blacken
-  :load-path "~/.emacs.d/lisp/blacken/")
+(use-package python-black
+  :demand t
+  :after python)
+
+;; a requirement for python-pytest, doesn't get installed by default for some reason
+(use-package dash-functional)
+(use-package python-pytest)
 
 ;; slice-image prevents scrolling issues in EIN. See
 ;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
 ;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
 ;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
+;;
+;; They made a bunch of updates to EIN, which broke things for me, most notably removing
+;; ein:slice-image
+;;
+;; Notes on trying to build this from local:
+;;
+;; Even if you have the right thing in your load-path, it doesn't quite work. This is
+;; because package-initialize does some autoloading magics that I don't fully grok,
+;; which allows the ein:* commands to be loaded and available.
+;;
+;; So, what I've done is copied the code in .emacs.d/elpa/ein.VERSION into a peter_dev
+;; version directory. Since this is still in the elpa/ directory, it automatically gets
+;; picked up by use-package. But, I've (tried to) set it up here so that it won't get
+;; auto-updated, or overwritten. Yes, this is hacky.
 (use-package ein
-  :pin melpa
+  ;; :pin melpa
+  :ensure nil
+  ;; :load-path "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp"
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   :config
@@ -271,7 +326,9 @@ levels to hide."
   (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
-  (ein:slice-image t)
+  (ein:output-area-inlined-images t) ;; not necessary in older versions
+  (ein:slice-image t) ;; doesn't do anything in new versions
+  (ein:urls "8888")
   ;; (ein:polymode t) ;; this is too buggy to use, and slows things down a ton
   :bind
   ("C-c C-x C-c" . ein:worksheet-clear-all-output))
@@ -288,7 +345,7 @@ levels to hide."
   :init
   (require 'helm-config)
   (setq helm-candidate-number-limit 100
-        helm-buffer-max-length 40)
+        helm-buffer-max-length nil)
   (helm-mode)
   :bind (("C-x C-b" . helm-buffers-list)
          ("C-x b" . helm-buffers-list)
@@ -333,7 +390,7 @@ levels to hide."
   :init
   (add-hook 'python-mode-hook 'jedi:setup)
   (add-hook 'python-mode-hook 'jedi:ac-setup)
-  (setq jedi:complete-on-dot t)
+  (setq jedi:complete-on-dot nil)
   ;; make a global kbd for use with elpy and ein to make sure jedi is on
   (global-set-key (kbd "C-x C-j") 'jedi:setup))
 
@@ -364,7 +421,7 @@ levels to hide."
 (add-to-list 'load-path "~/.emacs.d/lisp/sql-prestodb/src/")
 (require 'sql-presto)
 ;; configs to connect to SF's presto server
-(setq sql-server "presto.vertigo.stitchfix.com")
+(setq sql-server "http://presto.vertigo.stitchfix.com:8889")
 (setq sql-database "hive")
 ;; run presto via this special SF thing to work with Presto-Guard
 (setq sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar")
@@ -388,7 +445,7 @@ levels to hide."
   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
   :custom
   (sphinx-doc-all-arguments t)
-  (sphinx-doc-include-types t))
+  (sphinx-doc-include-types nil))
 
 ;; OX-JEKYLL-LITE ;;
 
@@ -412,7 +469,9 @@ levels to hide."
       org-startup-indented t
       org-hide-emphasis-markers t ;; don't show stars for bold, or whatever.
       org-agenda-files (list "~/Dropbox/org/work.org"
-                             "~/Dropbox/org/home.org"))
+                             "~/Dropbox/org/home.org")
+      org-image-actual-width nil ;; allow images to be resize
+      )
 
 ;; we want tex in our org stuffs! and it needs to not be tiny.
 (add-to-exec-path "/Library/TeX/texbin")
@@ -511,9 +570,10 @@ levels to hide."
  '(custom-safe-themes
    (quote
     ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
+ '(ein:truncate-long-cell-output nil nil nil "Customized with use-package ein")
  '(package-selected-packages
    (quote
-    (zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode smartparens realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))
+    (super-save expand-region pandoc-mode magit python-black python-pytest dash-functional zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode smartparens realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
