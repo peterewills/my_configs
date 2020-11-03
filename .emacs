@@ -39,6 +39,7 @@
       gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
       backup-directory-alist `((".*" . ,temporary-file-directory))
       auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+      load-prefer-newer t ;; recompile if byte-compiled file is out of date
 
       ;; input & interactionq
       mouse-wheel-scroll-amount '(1 ((shift) . 1)) ;; one line at a time
@@ -188,7 +189,6 @@ levels to hide."
 ;;;;;;;;;;;;;;
 
 (require 'package)
-
 (add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "https://melpa.org/packages"))
 (add-to-list 'package-archives ;; "stable" versions - sometimes not actually updated
@@ -208,6 +208,9 @@ levels to hide."
 ;; add :ensure t to every use-package declaration. Use stable versions by default
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+;; we pin to melpa by default since melpa-stable isn't always stable/reliable. If you
+;; start with an empty .emacs.d, then you'll load the latest version of packages, and
+;; things might break. Too bad you can't pin to certain versions.
 (setq use-package-always-pin "melpa")
 
 ;; Since we have both melpa and melpa-stable in our package-archives, we
@@ -245,33 +248,18 @@ levels to hide."
   (auto-save-default nil))
 
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
-;; other python-based binaries which are installed via --user. Also note that we're
-;; installing from a local clone of a fork, cause it has cold folding, which is shiny.
+;; other python-based binaries which are installed via --user.
+
+;; In our .emacs.d/lisp directory we have local clone of a fork, which I initially made
+;; in order to mess around more with folding. I never put in the time to really get it
+;; working smoothly; maybe just try using hideshow mode? It's been a while since I
+;; messed with this.
 ;;
 ;; For a fresh installation, you'll want to
 ;;
 ;;   pip install flake8 jedi autopep8 yapf
 ;;
 ;; This should get you full Elpy bells & whistles.
-
-;; ;; installing elpy from github repo in .emacs.d/lisp/
-;; (use-package elpy
-;;   :load-path "~/.emacs.d/lisp/elpy/"
-;;   :init
-;;   (add-to-exec-path "~/.pyenv/shims")
-;;   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
-;;   :custom
-;;   (elpy-rpc-python-command "~/.pyenv/versions/3.6.8/bin/python")
-;;   (python-shell-interpreter "~/.pyenv/versions/3.6.8/bin/python")
-;;   (elpy-rpc-backend "jedi")
-;;   :bind
-;;   ("C-c h b" . 'elpy-folding-hide-at-point) ;; python-specific hide-block
-;;   ("C-c h l" . 'elpy-folding-hide-leafs))
-;; ;; no idea why this comes up as not defined if it's in :init...
-;; (elpy-enable)
-
-;; config for MELPA version of elpy - keep around just in case.
-;;
 (use-package elpy
   :init
   (elpy-enable)
@@ -292,28 +280,34 @@ levels to hide."
 (use-package dash-functional)
 (use-package python-pytest)
 
-;; slice-image prevents scrolling issues in EIN. See
-;; https://github.com/tkf/emacs-ipython-notebook/issues/94 for more. Also, bind
-;; clear all output to C-c C-x C-c. Meant to mirror C-c C-x C-r to restart
-;; kernel, and avoids the awkward C-c C-S-l that clear-all-output defaults to.
-;;
-;; They made a bunch of updates to EIN, which broke things for me, most notably removing
-;; ein:slice-image
+;; EIN, build from local with some updates/fixes/etc.
 ;;
 ;; Notes on trying to build this from local:
 ;;
-;; Even if you have the right thing in your load-path, it doesn't quite work. This is
-;; because package-initialize does some autoloading magics that I don't fully grok,
-;; which allows the ein:* commands to be loaded and available.
+;; I tried cloning the github repo and then putting emacs-ipython-notebook/lisp (the
+;; directory containing the source .el files) into my load-path, but it didn't
+;; work. This is because package-initialize does some autoloading magics that I don't
+;; fully grok, which allows the ein:* commands to be autoloaded and available. I don't
+;; really understand what's going on here.
 ;;
 ;; So, what I've done is copied the code in .emacs.d/elpa/ein.VERSION into a peter_dev
-;; version directory. Since this is still in the elpa/ directory, it automatically gets
-;; picked up by use-package. But, I've (tried to) set it up here so that it won't get
-;; auto-updated, or overwritten. Yes, this is hacky.
+;; version directory, and then hacked directly on that. I keep this directory under
+;; version control:
+;;
+;; https://github.com/peterewills/emacs-ipython-notebook
+;;
+;; and stick it in my .emacs.d/lisp directory under the directory name
+;; ein-20200806.1552-peter.dev. I'm not sure if that directory name matters, probably
+;; not, but at this point I'm like who knows.
+;;
+;; Since this is still seen in the elpa/ directory, it automatically gets picked up by
+;; use-package. But, (I think) it won't get auto-updated, or overwritten, since I set
+;; :ensure to nil. Yes, this is hacky.
+;;
+;; TODO investigate using quelpa: https://github.com/quelpa/quelpa
 (use-package ein
   ;; :pin melpa
   :ensure nil
-  ;; :load-path "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp"
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   :config
@@ -326,8 +320,8 @@ levels to hide."
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
   (ein:auto-save-on-execute t)
-  (ein:output-area-inlined-images t) ;; not necessary in older versions
-  (ein:slice-image t) ;; doesn't do anything in new versions
+  (ein:output-area-inlined-images t)
+  (ein:slice-image t)
   (ein:urls "8888")
   :bind
   ("C-c C-x C-c" . ein:worksheet-clear-all-output)
