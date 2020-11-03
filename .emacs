@@ -190,9 +190,9 @@ levels to hide."
 
 (require 'package)
 (add-to-list 'package-archives ;; nightly builds from GitHub
-             '("melpa" . "https://melpa.org/packages"))
-(add-to-list 'package-archives ;; "stable" versions - sometimes not actually updated
-             '("melpa-stable" . "https://stable.melpa.org/packages"))
+             '("melpa" . "https://melpa.org/packages/"))
+;; (add-to-list 'package-archives ;; "stable" versions - sometimes not actually updated
+;;              '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (package-initialize)
 
 ;; It's best to use programmatic package specification so that this file can be
@@ -311,14 +311,6 @@ levels to hide."
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   :config
-  (defun ein:maybe-open-file-as-notebook ()
-    (interactive)
-    (when (eq major-mode 'ein:ipynb-mode)
-      (call-interactively #'ein:process-find-file-callback)))
-  (defun ein:nuke-and-pave ()
-    (interactive)
-    (call-interactively 'ein:worksheet-clear-all-output)
-    (call-interactively 'ein:notebook-restart-session-command))
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
   :custom
