@@ -311,10 +311,16 @@ levels to hide."
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   :config
-  (add-hook 'find-file-hook ;; open files as ipython notebooks automagically
-            (lambda ()
-              (when (eq major-mode 'ein:ipynb-mode)
-                (call-interactively #'ein:process-find-file-callback))))
+  (defun ein:maybe-open-file-as-notebook ()
+    (interactive)
+    (when (eq major-mode 'ein:ipynb-mode)
+      (call-interactively #'ein:process-find-file-callback)))
+  (defun ein:nuke-and-pave ()
+    (interactive)
+    (call-interactively 'ein:worksheet-clear-all-output)
+    (call-interactively 'ein:notebook-restart-session-command))
+  ;; open files as ipython notebooks automagically
+  (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
   :custom
   (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
   (ein:complete-on-dot t)
@@ -325,6 +331,7 @@ levels to hide."
   (ein:urls "8888")
   :bind
   ("C-c C-x C-c" . ein:worksheet-clear-all-output)
+  ("C-c C-x C-k" . ein:nuke-and-pave)
   ("C-c b c" . ein:worksheet-python-black-cell))
 
 ;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
@@ -408,10 +415,11 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;
 
 ;; SQL-PRESTO ;;
-
+;;
 ;; had some trouble getting this to play nice with use-package and local-path. Oh well.
-
-;; Fixed some typos and added a couple features relative to the MELPA version.
+;;
+;; Fixed some typos and added a couple features relative to the MELPA version. This
+;; breaks in Emacs 27.1 - see comments in the code.
 (add-to-list 'load-path "~/.emacs.d/lisp/sql-prestodb/src/")
 (require 'sql-presto)
 ;; configs to connect to SF's presto server
@@ -429,8 +437,6 @@ levels to hide."
 
 ;; Included support for type-hints. Do C-c M-d to insert docstrings for
 ;; functions.
-;;
-;; TODO Add support for "updating" docstrings, when more arguments are added.
 (use-package sphinx-doc
   :ensure nil
   :load-path "~/.emacs.d/lisp/sphinx-doc.el/"
