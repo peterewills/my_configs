@@ -188,12 +188,11 @@ levels to hide."
 ;;;;;;;;;;;;;;
 
 (require 'package)
+
 (add-to-list 'package-archives ;; nightly builds from GitHub
-             '("melpa" . "http://melpa.org/packages/"))
-(add-to-list 'package-archives
-             '("gnu" . "http://elpa.gnu.org/packages/"))
+             '("melpa" . "https://melpa.org/packages"))
 (add-to-list 'package-archives ;; "stable" versions - sometimes not actually updated
-             '("melpa-stable" . "http://stable.melpa.org/packages/"))
+             '("melpa-stable" . "https://stable.melpa.org/packages"))
 (package-initialize)
 
 ;; It's best to use programmatic package specification so that this file can be
@@ -209,7 +208,7 @@ levels to hide."
 ;; add :ensure t to every use-package declaration. Use stable versions by default
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
-(setq use-package-always-pin "melpa-stable")
+(setq use-package-always-pin "melpa")
 
 ;; Since we have both melpa and melpa-stable in our package-archives, we
 ;; shouldn't just :ensure these things. Cause then we might get the nightly
@@ -326,12 +325,13 @@ levels to hide."
   (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
+  (ein:auto-save-on-execute t)
   (ein:output-area-inlined-images t) ;; not necessary in older versions
   (ein:slice-image t) ;; doesn't do anything in new versions
   (ein:urls "8888")
-  ;; (ein:polymode t) ;; this is too buggy to use, and slows things down a ton
   :bind
-  ("C-c C-x C-c" . ein:worksheet-clear-all-output))
+  ("C-c C-x C-c" . ein:worksheet-clear-all-output)
+  ("C-c b c" . ein:worksheet-python-black-cell))
 
 ;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
 ;; of cases.
