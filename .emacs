@@ -237,16 +237,6 @@ levels to hide."
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet)
 
-(use-package super-save
-  :ensure t
-  :config
-  (super-save-mode +1)
-  (add-to-list 'super-save-triggers 'switch-to-buffer)
-  (add-to-list 'super-save-triggers 'other-window)
-  :custom
-  (super-save-auto-save-when-idle t)
-  (auto-save-default nil))
-
 ;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
 ;; other python-based binaries which are installed via --user.
 
@@ -266,7 +256,10 @@ levels to hide."
   (add-to-exec-path "~/.pyenv/shims")
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   (add-hook 'elpy-mode-hook (lambda () (hs-minor-mode)))
-  (add-hook 'elpy-mode-hook (lambda () (auto-fill-mode)))
+  ;; turn off auto-fill-mode in python environments - it ends up doing syntactically
+  ;; invalid wrapping. Just use C-c C-c b to blacken the whole buffer if you want to
+  ;; "wrap". For comments you can use M-q as usual.
+  (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   :custom
   (elpy-rpc-python-command "~/.pyenv/versions/3.7.8/bin/python")
   (python-shell-interpreter "~/.pyenv/versions/3.7.8/bin/python")
@@ -276,13 +269,14 @@ levels to hide."
   :demand t
   :after python)
 
+(use-package py-isort
+  :after python)
+
 ;; a requirement for python-pytest, doesn't get installed by default for some reason
 (use-package dash-functional)
 (use-package python-pytest)
 
 ;; EIN, build from local with some updates/fixes/etc.
-;;
-;; Notes on trying to build this from local:
 ;;
 ;; I tried cloning the github repo and then putting emacs-ipython-notebook/lisp (the
 ;; directory containing the source .el files) into my load-path, but it didn't
@@ -322,6 +316,7 @@ levels to hide."
   (ein:slice-image t)
   (ein:urls "8888")
   :bind
+  ("C-x M-w" . ein:notebook-save-to-command)
   ("C-c C-x C-c" . ein:worksheet-clear-all-output)
   ("C-c C-x C-k" . ein:nuke-and-pave)
   ("C-c b c" . ein:worksheet-python-black-cell))
@@ -331,8 +326,9 @@ levels to hide."
 (use-package ido
   :init (ido-mode t))
 
-;; I don't use a lot of these keybindings, but I'm going to leave them in here
-;; so that I can dig into them later if I get curious.
+;; this is why emacs will win the editor wars
+(use-package fireplace)
+
 (use-package helm
   :diminish helm-mode ;; don't show in mode-list
   :init
@@ -565,7 +561,7 @@ levels to hide."
  '(ein:truncate-long-cell-output nil nil nil "Customized with use-package ein")
  '(package-selected-packages
    (quote
-    (super-save expand-region pandoc-mode magit python-black python-pytest dash-functional zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode smartparens realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))
+    (fireplace py-isort super-save expand-region pandoc-mode magit python-black python-pytest dash-functional zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

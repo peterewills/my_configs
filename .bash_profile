@@ -19,12 +19,19 @@ export LANG=en_US.utf-8
 alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs "$@"'
 alias run_compare_backfills_notebook='python /Users/peterwills/code/stitchfix/jyn-backtest/scripts/run_compare_backfills_notebook.py'
 
+# got tired of writing these out
+alias jphtml='jupyter nbconvert --to html'
+alias jpscript='jupyter nbconvert --to script'
+alias ipdb='python -m ipdb -c continue'
+
 #############################
 ### ENVIRONMENT VARIABLES ###
 #############################
 
 export STITCHFIX_USER_EMAIL=peter.wills@stitchfix.com
+export SF_ENV=prod  # something about bumblebee... I dunno
 export VAULT_ADDR=https://hvault.vertigo.stitchfix.com
+export JYN_DEV_LOADER=true
 
 # pip install --user puts stuff in this bin
 export PATH="/Users/peterwills/.local/bin:$PATH"
@@ -79,12 +86,12 @@ fi
 #
 #  https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 source ~/.git-completion.bash
+# Tokens we don't want to push to GitHub :facepalm:
+source ~/.tokens
 
 ##
 # Your previous /Users/peterwills/.bash_profile file was backed up as /Users/peterwills/.bash_profile.macports-saved_2019-08-28_at_11:41:08
 ##
-
 # MacPorts Installer addition on 2019-08-28_at_11:41:08: adding an appropriate PATH variable for use with MacPorts.
 export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 # Finished adapting your PATH environment variable for use with MacPorts.
-

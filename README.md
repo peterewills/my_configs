@@ -1,7 +1,7 @@
 # Installing Configs
 
 My general approach is to link the expected location of the configuration files
-to this directory, which I assume is cloned into `~/.config/my_configs`. 
+to this directory, which I assume is cloned into `~/.config/my_configs`.
 
 ### Bash profile
 
@@ -21,13 +21,22 @@ To allow yourself to delete a word at a time using `Ctrl-delete`, enter the
 keyboard shortcut manually. The "Action" you want to link this to is
 `\033\177`, which you get by doing `esc delete`.
 
-### Matplotlib style
+### IPython Startup
 
-The best way to get I never got `zenburn.mplstyle` to work properly. I'll leave
-it here for now. Just put `zenburn_plots.py` in
-`~/.ipython/profile_default/startup/`, and then you can run `zenburn_plots()`
-in your notebooks to get them Zenburn-styled. Useful if you want your plots to
-play nice with your emacs theme.
+Link the `ipython_startup` directory, as follows:
+
+`ln -s ~/.config/my_configs/ipython_startup ~/.ipython/profile_default/startup`
+
+#### Plot style
+
+The `zenburn_plots.py` file implements the zenburn color theme in matplotlib plots (&
+seaborn, if available). This makes it play nice with Emacs IPython Notebook.
+
+I never got `zenburn.mplstyle` to work properly. I'll leave it here for now.
+
+#### Notify Cell Magics
+
+TODO
 
 ### Default Keybindings
 
@@ -52,7 +61,7 @@ will allow you to put the app on the dock, so it's more app-y and less
 command-utility-y.
 
 Do this after you set up your keybindings, since then you'll have the meta key
-set to the apple key as you're used to. 
+set to the apple key as you're used to.
 
 Then, put your `.emacs` in place: `ln -s ./.emacs ~/.emacs`. This _should_ be
 plug-and-play, save for getting Zenburn from github, which is outlined in the
@@ -70,5 +79,3 @@ Also do the same for `.gitconfig`.
 
 Since 2-factor authentication is set up, you'll need to generate a token instead
 of using your github password.
-
-
