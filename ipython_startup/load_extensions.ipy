@@ -1,0 +1,2 @@
+# this has to be a .ipy file so that you can use magics (to load magics)
+%load_ext my_magics
