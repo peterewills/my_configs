@@ -1,11 +1,13 @@
 # Created by Zachary Burchill, 2019, adapted by Peter Wills, 2020
-
+#
 # Feel free to use/modify however you want, but be nice and please give Zachary
 # credit/attribution.
 #
-# Put this file in your jupyter directory and load it in the first cell with:
-#   %load_ext magics
-# After that, you can use %%notify.
+# This magic should be loaded automatically, since load_extensions.ipynb gets run at
+# startup. If not, you should be able to do `%load_ext my_magics` and load it.
+#
+# Then, you can just add `%%notify` at the top of a cell, and a notification will alert
+# you when the cell has finished running.
 
 from IPython.core.magic import Magics, cell_magic, magics_class
 import logging
