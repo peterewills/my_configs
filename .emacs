@@ -278,35 +278,14 @@ levels to hide."
 
 ;; EIN, build from local with some updates/fixes/etc.
 ;;
-;; I tried cloning the github repo and then putting emacs-ipython-notebook/lisp (the
-;; directory containing the source .el files) into my load-path, but it didn't
-;; work. This is because package-initialize does some autoloading magics that I don't
-;; fully grok, which allows the ein:* commands to be autoloaded and available. I don't
-;; really understand what's going on here.
-;;
-;; So, what I've done is copied the code in .emacs.d/elpa/ein.VERSION into a peter_dev
-;; version directory, and then hacked directly on that. I keep this directory under
-;; version control:
-;;
-;; https://github.com/peterewills/emacs-ipython-notebook
-;;
-;; and stick it in my .emacs.d/lisp directory under the directory name
-;; ein-20200806.1552-peter.dev. I'm not sure if that directory name matters, probably
-;; not, but at this point I'm like who knows.
-;;
-;; Since this is still seen in the elpa/ directory, it automatically gets picked up by
-;; use-package. But, (I think) it won't get auto-updated, or overwritten, since I set
-;; :ensure to nil. Yes, this is hacky.
-;;
-;; Since I don't understand how loading happens, it makes it hard for me to do custom
-;; hacking. I get around this by having an ein-custom.el and specifically requiring it.
-;;
-;; TODO investigate using quelpa: https://github.com/quelpa/quelpa
+;; Leave the package-generate-autoloads call commented out unless you're acitvely
+;; working on the code.
 (use-package ein
-  ;; :pin melpa
   :ensure nil
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
+  ;; (package-generate-autoloads "ein" "~/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
+  (load-file "~/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
