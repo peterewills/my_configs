@@ -298,12 +298,16 @@ levels to hide."
 ;; use-package. But, (I think) it won't get auto-updated, or overwritten, since I set
 ;; :ensure to nil. Yes, this is hacky.
 ;;
+;; Since I don't understand how loading happens, it makes it hard for me to do custom
+;; hacking. I get around this by having an ein-custom.el and specifically requiring it.
+;;
 ;; TODO investigate using quelpa: https://github.com/quelpa/quelpa
 (use-package ein
   ;; :pin melpa
   :ensure nil
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
+  (require 'ein-custom) ;; load custom functions etc
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
@@ -312,6 +316,7 @@ levels to hide."
   (ein:complete-on-dot t)
   (ein:truncate-long-cell-output nil)
   (ein:auto-save-on-execute t)
+  (ein:auto-black-on-execute t)
   (ein:output-area-inlined-images t)
   (ein:slice-image t)
   (ein:urls "8888")
@@ -319,6 +324,7 @@ levels to hide."
   ("C-x M-w" . ein:notebook-save-to-command)
   ("C-c C-x C-c" . ein:worksheet-clear-all-output)
   ("C-c C-x C-k" . ein:nuke-and-pave)
+  ("C-c C-x C-f" . ein:notebook-new-simple)
   ("C-c b c" . ein:worksheet-python-black-cell))
 
 ;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
@@ -574,3 +580,4 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (find-file "~/Dropbox/org/work.org")
+(save-place-local-mode -1)

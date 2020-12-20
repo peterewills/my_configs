@@ -1,5 +1,7 @@
 # Created by Zachary Burchill, 2019, adapted by Peter Wills, 2020
 #
+# https://gist.github.com/burchill/4adb9531a246e8c27752c1b19e0236bb
+#
 # Feel free to use/modify however you want, but be nice and please give Zachary
 # credit/attribution.
 #
@@ -9,7 +11,7 @@
 # Then, you can just add `%%notify` at the top of a cell, and a notification will alert
 # you when the cell has finished running.
 
-from IPython.core.magic import Magics, cell_magic, magics_class
+from IPython.core.magic import Magics, line_cell_magic, magics_class
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 @magics_class
 class MyMagics(Magics):
-    @cell_magic
-    def notify(self, line, cell):
+    @line_cell_magic
+    def notify(self, line, cell=None):
         """
         Notifies when the cell finishes running, if pync is available.
         """
