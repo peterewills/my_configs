@@ -307,7 +307,6 @@ levels to hide."
   :ensure nil
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
-  (require 'ein-custom) ;; load custom functions etc
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
@@ -324,7 +323,7 @@ levels to hide."
   ("C-x M-w" . ein:notebook-save-to-command)
   ("C-c C-x C-c" . ein:worksheet-clear-all-output)
   ("C-c C-x C-k" . ein:nuke-and-pave)
-  ("C-c C-x C-f" . ein:notebook-new-simple)
+  ("C-c C-x C-f" . ein:new-notebook)
   ("C-c b c" . ein:worksheet-python-black-cell))
 
 ;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
