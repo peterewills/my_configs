@@ -108,10 +108,10 @@
 ;; I should really think through where I want to put my binaries and get them
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
-(add-to-exec-path "~/.local/bin")
+(add-to-exec-path "/Users/peterwills/.local/bin")
 ;; we prefix this to the path to guarantee that the python that gets used is the one
 ;; defined by pyenv, not /usr/bin/python
-(prefix-to-exec-path "~/.pyenv/shims")
+(prefix-to-exec-path "/Users/peterwills/.pyenv/shims")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -253,7 +253,6 @@ levels to hide."
 (use-package elpy
   :init
   (elpy-enable)
-  (add-to-exec-path "~/.pyenv/shims")
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   (add-hook 'elpy-mode-hook (lambda () (hs-minor-mode)))
   ;; turn off auto-fill-mode in python environments - it ends up doing syntactically
@@ -261,8 +260,8 @@ levels to hide."
   ;; "wrap". For comments you can use M-q as usual.
   (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   :custom
-  (elpy-rpc-python-command "~/.pyenv/versions/3.7.8/bin/python")
-  (python-shell-interpreter "~/.pyenv/versions/3.7.8/bin/python")
+  (elpy-rpc-python-command "/Users/peterwills/.pyenv/versions/3.7.8/bin/python")
+  (python-shell-interpreter "/Users/peterwills/.pyenv/versions/3.7.8/bin/python")
   (elpy-rpc-backend "jedi"))
 
 (use-package python-black
@@ -284,8 +283,8 @@ levels to hide."
   :ensure nil
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
-  ;; (package-generate-autoloads "ein" "~/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
-  (load-file "~/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
+  (package-generate-autoloads "ein" "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
+  (load-file "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
@@ -392,7 +391,7 @@ levels to hide."
 ;;
 ;; Fixed some typos and added a couple features relative to the MELPA version. This
 ;; breaks in Emacs 27.1 - see comments in the code.
-(add-to-list 'load-path "~/.emacs.d/lisp/sql-prestodb/src/")
+(add-to-list 'load-path "/Users/peterwills/.emacs.d/lisp/sql-prestodb/src/")
 (require 'sql-presto)
 ;; configs to connect to SF's presto server
 (setq sql-server "http://presto.vertigo.stitchfix.com:8889")
@@ -411,7 +410,7 @@ levels to hide."
 ;; functions.
 (use-package sphinx-doc
   :ensure nil
-  :load-path "~/.emacs.d/lisp/sphinx-doc.el/"
+  :load-path "/Users/peterwills/.emacs.d/lisp/sphinx-doc.el/"
   :init
   (diminish 'sphinx-doc-mode)
   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
@@ -424,9 +423,9 @@ levels to hide."
 ;; markdown exporter for org mode that plays nice with jekyll
 (use-package ox-jekyll-lite
   :ensure nil
-  :load-path "~/.emacs.d/lisp/ox-jekyll-lite/"
+  :load-path "/Users/peterwills/.emacs.d/lisp/ox-jekyll-lite/"
   :custom
-  (org-jekyll-project-root "~/code/jekyll/peterewills.github.io"))
+  (org-jekyll-project-root "/Users/peterwills/code/jekyll/peterewills.github.io"))
 
 ;;;;;;;;;;;;;;
 ;; ORG MODE ;;
@@ -440,8 +439,8 @@ levels to hide."
       ;; indent rather than showing all the stars
       org-startup-indented t
       org-hide-emphasis-markers t ;; don't show stars for bold, or whatever.
-      org-agenda-files (list "~/Dropbox/org/work.org"
-                             "~/Dropbox/org/home.org")
+      org-agenda-files (list "/Users/peterwills/Dropbox/org/work.org"
+                             "/Users/peterwills/Dropbox/org/home.org")
       org-image-actual-width nil ;; allow images to be resize
       )
 
@@ -480,7 +479,7 @@ levels to hide."
 ;;   :init
 ;;   ;; Fix an incompatibility between the ob-async and ob-ipython packages
 ;;   (setq ob-async-no-async-languages-alist '("ipython"))
-;;   (setq ob-ipython-command "~/.pyenv/shims/ipython"))
+;;   (setq ob-ipython-command "/Users/peterwills/.pyenv/shims/ipython"))
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -557,5 +556,5 @@ levels to hide."
 ;; OPEN MY ORG FILE AT STARTUP ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(find-file "~/Dropbox/org/work.org")
+(find-file "/Users/peterwills/Dropbox/org/work.org")
 (save-place-local-mode -1)
