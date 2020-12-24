@@ -557,4 +557,7 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (find-file "/Users/peterwills/Dropbox/org/work.org")
+;; saving your place in org files is kinda weird, cause then when they reopen the tree
+;; doesn't quite display correctly - it doesn't unfold in a "natural" way. So, just
+;; don't wave place in this file.
 (save-place-local-mode -1)
