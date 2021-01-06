@@ -49,6 +49,7 @@
       mac-command-modifier 'meta
       ring-bell-function 'ignore ;; no more annoying boop
       vc-follow-symlinks t
+      pixel-scroll-mode t
 
       ;; exiting emacs
       confirm-kill-emacs 'yes-or-no-p
@@ -60,18 +61,6 @@
               indent-tabs-mode nil ;; use spaces
               tab-width 4 ;; always 4
               fill-column 88) ;; PEP8 >_<
-
-;; window should fill half the screen width-wise, and be full-height
-(add-to-list 'default-frame-alist '(width . 0.5))
-(add-to-list 'default-frame-alist '(height . 1.0))
-
-;; set default font
-(add-to-list 'default-frame-alist '(font . "Menlo-14" ))
-(set-face-attribute 'default t :font "Menlo-14" )
-
-;; highlight current line
-(global-hl-line-mode 1)
-(set-face-background 'hl-line "#000")
 
 ;; save your place
 (save-place-mode 1)
@@ -220,6 +209,9 @@ levels to hide."
 ;; version you want manually.
 
 ;; alien fruit salad ++
+;;
+;; Note that most of the themeing is done by nano. This only impacts areas where nano
+;;has gaps (e.g. helm).
 (use-package zenburn-theme
   :init
   (load-theme 'zenburn t)
@@ -284,7 +276,10 @@ levels to hide."
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   (package-generate-autoloads "ein" "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
-  (load-file "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
+  (load-file
+   "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
+  ;; (defun foobar () "Test" (format "Peter's Modeline | %s" (ein:header-line)))
+  ;; (setq ein:header-line-format '(:eval (foobar)))
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
@@ -375,12 +370,6 @@ levels to hide."
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
-;; github-flavored markdown previews using C-c C-c g
-(use-package grip-mode
-  :ensure t
-  :bind (:map markdown-mode-command-map
-         ("g" . grip-mode)))
-
 ;;;;;;;;;;;;;;;;;;;;
 ;; LOCAL PACKAGES ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -463,28 +452,12 @@ levels to hide."
 (add-hook 'org-mode-hook 'org-preview-all-latex-fragments)
 (add-hook 'org-mode-hook (lambda () (org-increase-latex-preview-scale 1.5)))
 
-
-;; Somehow I can't get this to work. I manually copied the ob-ipython to .emacs.d/elpa
-;; and it still doesn't like it.
-;;
-;; If I get excited about code execution in org mode anytime soon, just install
-;; emacs-jupyter (just called 'jupyter' in MELPA) and use that instead.
-
-;; ;; Run/highlight code using babel in org-mode. see dzop/emacs-jupyter for an
-;; ;; alternative, maybe more responsive to issues?  Could submit something about
-;; ;; image slicing there.
-;; ;;
-;; ;; Also good to be aware that this slows startup down by a couple seconds.
-;; (use-package ob-ipython
-;;   :init
-;;   ;; Fix an incompatibility between the ob-async and ob-ipython packages
-;;   (setq ob-async-no-async-languages-alist '("ipython"))
-;;   (setq ob-ipython-command "/Users/peterwills/.pyenv/shims/ipython"))
+;; If I get excited about code execution in org mode anytime soon, just use the kernel
+;; from EIN (it lets you connect to notebook kernels, or run an "anonymous" kernel).
 
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)
-;;   (ipython . t)
    (shell . t)
    (emacs-lisp . t)))
 
@@ -497,31 +470,7 @@ levels to hide."
   (forward-line -2)
   (goto-char (line-end-position)))
 
-(defun org-insert-ipython-block ()
-  "Insert a code block for ipython, which uses the default session, and outputs
-  the results to a drawer for inline plotting."
-  (interactive)
-  (insert "#+BEGIN_SRC ipython :async t :results drawer :session
-
-#+END_SRC")
-  (forward-line -2)
-  (goto-char (line-end-position)))
-
-(defun org-insert-ipython-imports-block ()
-  "Insert the usual imports, so that we don't have to type them over and over"
-  (interactive)
-  (insert "#+BEGIN_SRC ipython :session
-  import numpy as np
-  import pandas as pd
-  from matplotlib import pyplot as plt
-  %matplotlib inline
-#+END_SRC")
-  (forward-line -2)
-  (goto-char (line-end-position)))
-
-(define-key org-mode-map (kbd "C-c i p") 'org-insert-ipython-block)
 (define-key org-mode-map (kbd "C-c i s") 'org-insert-sql-block)
-(define-key org-mode-map (kbd "C-c i i") 'org-insert-ipython-imports-block)
 
 ;; Syntax highlight in #+BEGIN_SRC blocks
 (setq org-src-fontify-natively t)
@@ -529,6 +478,28 @@ levels to hide."
 (setq org-confirm-babel-evaluate nil)
 
 (diminish 'org-indent-mode)
+
+;;;;;;;;;;;;;
+;; N Λ N O ;;
+;;;;;;;;;;;;;
+
+;; I use the portions of this that focus on appearance.
+
+(load-file "/Users/peterwills/code/elisp/nano-emacs/nano-init.el")
+
+;;;;;;;;;;;;;;;;
+;; APPEARANCE ;;
+;;;;;;;;;;;;;;;;
+
+;; run this stuff after nano so that it takes precedence
+
+;; window should fill half the screen width-wise, and be full-height
+(add-to-list 'default-frame-alist '(width . 0.5))
+(add-to-list 'default-frame-alist '(height . 1.0))
+
+;; highlight current line
+(global-hl-line-mode 1)
+(set-face-background 'hl-line "#393939")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -541,7 +512,7 @@ levels to hide."
  '(custom-safe-themes
    (quote
     ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
- '(ein:truncate-long-cell-output nil nil nil "Customized with use-package ein")
+ '(ein:truncate-long-cell-output nil t nil "Customized with use-package ein")
  '(package-selected-packages
    (quote
     (fireplace py-isort super-save expand-region pandoc-mode magit python-black python-pytest dash-functional zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))

@@ -24,6 +24,8 @@ alias jphtml='jupyter nbconvert --to html'
 alias jpscript='jupyter nbconvert --to script'
 alias ipdb='python -m ipdb -c continue'
 
+alias nano_emacs='emacs -q -l /Users/peterwills/code/elisp/nano-emacs/nano.el -l /Users/peterwills/code/elisp/nano-emacs/.emacs -zenburn'
+
 #############################
 ### ENVIRONMENT VARIABLES ###
 #############################
