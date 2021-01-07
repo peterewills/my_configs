@@ -33,27 +33,32 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(setq inhibit-startup-message t ;; get rid of that picture at startup
+(setq
+ ;;startup
+ inhibit-startup-message t ;; get rid of that picture at startup
+ inhibit-startup-echo-area-message t
+ initial-scratch-message nil
+ initial-major-mode 'fundamental-mode
 
-      ;; performance
-      gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
-      backup-directory-alist `((".*" . ,temporary-file-directory))
-      auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
-      load-prefer-newer t ;; recompile if byte-compiled file is out of date
+ ;; performance
+ gc-cons-threshold 50000000 ;; higher GC threshold, since I have plenty of RAM
+ backup-directory-alist `((".*" . ,temporary-file-directory))
+ auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+ load-prefer-newer t ;; recompile if byte-compiled file is out of date
 
-      ;; input & interactionq
-      mouse-wheel-scroll-amount '(1 ((shift) . 1)) ;; one line at a time
-      mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
-      mouse-wheel-follow-mouse 't ;; scroll window under mouse
-      scroll-step 1 ;; keyboard scroll one line at a time
-      mac-command-modifier 'meta
-      ring-bell-function 'ignore ;; no more annoying boop
-      vc-follow-symlinks t
-      pixel-scroll-mode t
+ ;; input & interactionq
+ mouse-wheel-scroll-amount '(1 ((shift) . 1)) ;; one line at a time
+ mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
+ mouse-wheel-follow-mouse 't ;; scroll window under mouse
+ scroll-step 1 ;; keyboard scroll one line at a time
+ mac-command-modifier 'meta
+ ring-bell-function 'ignore ;; no more annoying boop
+ vc-follow-symlinks t
+ pixel-scroll-mode t
 
-      ;; exiting emacs
-      confirm-kill-emacs 'yes-or-no-p
-      confirm-kill-processes nil)
+ ;; exiting emacs
+ confirm-kill-emacs 'yes-or-no-p
+ confirm-kill-processes nil)
 
 ;; use -default when variables are buffer-local
 (setq-default truncate-lines t ;; truncate rather than wrap lines
@@ -61,6 +66,10 @@
               indent-tabs-mode nil ;; use spaces
               tab-width 4 ;; always 4
               fill-column 88) ;; PEP8 >_<
+
+;; Default shell in term
+(setq-default shell-file-name "/bin/bash")
+(setq explicit-shell-file-name "/bin/bash")
 
 ;; save your place
 (save-place-mode 1)
