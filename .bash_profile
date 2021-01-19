@@ -38,6 +38,9 @@ export JYN_DEV_LOADER=true
 # pip install --user puts stuff in this bin
 export PATH="/Users/peterwills/.local/bin:$PATH"
 
+# STFU terminal, I like bash
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
 ######################
 ### COMMAND PROMPT ###
 ######################

@@ -284,11 +284,9 @@ levels to hide."
   :ensure nil
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
-  (package-generate-autoloads "ein" "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
+  ;; (package-generate-autoloads "ein" "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
   (load-file
    "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
-  ;; (defun foobar () "Test" (format "Peter's Modeline | %s" (ein:header-line)))
-  ;; (setq ein:header-line-format '(:eval (foobar)))
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
@@ -383,24 +381,20 @@ levels to hide."
 ;; LOCAL PACKAGES ;;
 ;;;;;;;;;;;;;;;;;;;;
 
+
 ;; SQL-PRESTO ;;
-;;
-;; had some trouble getting this to play nice with use-package and local-path. Oh well.
-;;
-;; Fixed some typos and added a couple features relative to the MELPA version. This
-;; breaks in Emacs 27.1 - see comments in the code.
-(add-to-list 'load-path "/Users/peterwills/.emacs.d/lisp/sql-prestodb/src/")
-(require 'sql-presto)
-;; configs to connect to SF's presto server
-(setq sql-server "http://presto.vertigo.stitchfix.com:8889")
-(setq sql-database "hive")
-;; run presto via this special SF thing to work with Presto-Guard
-(setq sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar")
-;; make it easy to connect a buffer to an interactive presto session
-(global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
-(define-key sql-mode-map (kbd "M-P") 'sql-prestofy-buffer)
-;; we'd like to add a sql-prestofy-buffer hook for sql-mode, but that prevents
-;; the initial window from ever opening! How to fix?
+(use-package sql-presto
+  :ensure nil
+  :load-path "/Users/peterwills/.emacs.d/lisp/sql-prestodb/src/"
+  :init
+  ;; make it easy to connect a buffer to an interactive presto session
+  (global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
+  :custom
+  ;; configs to connect to SF's presto server
+  (sql-server "http://presto.vertigo.stitchfix.com:8889")
+  (sql-database "hive")
+  ;; run presto via this special SF thing to work with Presto-Guard
+  (sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar"))
 
 ;; SPHINX-DOC ;;
 
@@ -535,6 +529,7 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OPEN MY ORG FILE AT STARTUP ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (find-file "/Users/peterwills/Dropbox/org/work.org")
 ;; saving your place in org files is kinda weird, cause then when they reopen the tree
