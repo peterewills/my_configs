@@ -2,12 +2,6 @@
 ;;;;;; PETER'S .emacs! ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;; Credit to the better-defaults package, various stack exchange articles, and Sandeep Nambiar:
-;;
-;;  https://www.sandeepnambiar.com/my-minimal-emacs-setup/
-
-
 ;;;;;;;;;;;;;;;;;;;;
 ;; ZENBURN COLORS ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -58,7 +52,10 @@
 
  ;; exiting emacs
  confirm-kill-emacs 'yes-or-no-p
- confirm-kill-processes nil)
+ confirm-kill-processes nil
+
+ ;; don't save custom variables
+ custom-file (make-temp-file "emacs-custom"))
 
 ;; use -default when variables are buffer-local
 (setq-default truncate-lines t ;; truncate rather than wrap lines
@@ -182,6 +179,25 @@ levels to hide."
      (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
      (setq dired-listing-switches "-alFh")))
 
+;; smerge - turn on smerge automatically on files with conflicts. Simplify the
+;; keybindings.
+
+(defun sm-try-smerge ()
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^<<<<<<< " nil t)
+      (smerge-mode 1))))
+
+(add-hook 'find-file-hook 'sm-try-smerge t)
+(add-hook 'smerge-mode-hook
+      (lambda ()
+        (local-set-key (kbd "M-RET") #'smerge-keep-current)
+        (local-set-key (kbd "M-a") #'smerge-keep-all)
+        (local-set-key (kbd "M-u") #'smerge-keep-upper)
+        (local-set-key (kbd "M-l") #'smerge-keep-lower)
+        (local-set-key (kbd "M-n") #'smerge-next)
+        (local-set-key (kbd "M-p") #'smerge-prev)))
+
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
@@ -218,9 +234,6 @@ levels to hide."
 ;; version you want manually.
 
 ;; alien fruit salad ++
-;;
-;; Note that most of the themeing is done by nano. This only impacts areas where nano
-;;has gaps (e.g. helm).
 (use-package zenburn-theme
   :init
   (load-theme 'zenburn t)
@@ -488,7 +501,7 @@ levels to hide."
 
 ;; I use the portions of this that focus on appearance.
 
-(load-file "/Users/peterwills/code/elisp/nano-emacs/nano-init.el")
+;; (load-file "/Users/peterwills/code/elisp/nano-emacs/nano-init.el")
 
 ;;;;;;;;;;;;;;;;
 ;; APPEARANCE ;;
@@ -504,27 +517,13 @@ levels to hide."
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "#393939")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; This is set when you use the customize-variable interface
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("1eb9aac16922091cdb1fb0d2d25fa916b51a29f7006276f4133ce720b7f315e7" default)))
- '(ein:truncate-long-cell-output nil t nil "Customized with use-package ein")
- '(package-selected-packages
-   (quote
-    (fireplace py-isort super-save expand-region pandoc-mode magit python-black python-pytest dash-functional zenburn-theme yaml-mode which-key use-package treemacs-projectile treemacs-magit treemacs-icons-dired treemacs-evil sqlup-mode realgud nyan-mode multiple-cursors magit-popup jupyter jedi htmlize helm grip-mode graphql forge ein diminish company-jedi blacken all-the-icons-dired))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; I'd prefer to have the weight be light, but then the bold stuff really looks
+;; ridiculous next to it. So, the question is, how can I set the default weight to light
+;; and the bold stuff to medium weight? That would be optimal.
+(set-face-attribute 'default nil
+                    :height 140
+                    :family "Fira Code Light"
+                    :weight 'medium)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OPEN MY ORG FILE AT STARTUP ;;
