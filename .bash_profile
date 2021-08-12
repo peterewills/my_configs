@@ -26,6 +26,14 @@ alias ipdb='python -m ipdb -c continue'
 
 alias nano_emacs='emacs -q -l /Users/peterwills/code/elisp/nano-emacs/nano.el -l /Users/peterwills/code/elisp/nano-emacs/.emacs -zenburn'
 
+list_versions () {
+    # list the available versions of a python package. don't just do `pip install ==`
+    # without a version number, because then it can install version 0.0 we assume that
+    # packages won't have version 100.100.100.foobar available. If they do, this won't
+    # work.
+    pip install $1==100.100.100.foobar --use-deprecated=legacy-resolver
+}
+
 #############################
 ### ENVIRONMENT VARIABLES ###
 #############################
@@ -54,9 +62,9 @@ export PS1="\[\033[96m\]\W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 
 
-#################################
-### SUPERCHARGED BASH HISTORY ###
-#################################
+# #################################
+# ### SUPERCHARGED BASH HISTORY ###
+# #################################
 
 # https://metaredux.com/posts/2020/07/07/supercharge-your-bash-history.html
 
@@ -77,11 +85,11 @@ HISTSIZE=100000
 HISTFILESIZE=10000000
 
 
-#############
-### OTHER ###
-#############
+# #############
+# ### OTHER ###
+# #############
 
-# pyenv initialization
+# # pyenv initialization
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"

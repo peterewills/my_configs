@@ -5,7 +5,7 @@
 # Feel free to use/modify however you want, but be nice and please give Zachary
 # credit/attribution.
 #
-# This magic should be loaded automatically, since load_extensions.ipynb gets run at
+# This magic should be loaded automatically, since load_extensions.ipy gets run at
 # startup. If not, you should be able to do `%load_ext my_magics` and load it.
 #
 # Then, you can just add `%%notify` at the top of a cell, and a notification will alert

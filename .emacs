@@ -68,6 +68,9 @@
 (setq-default shell-file-name "/bin/bash")
 (setq explicit-shell-file-name "/bin/bash")
 
+;; always do y-or-n
+(fset 'yes-or-no-p 'y-or-n-p)
+
 ;; save your place
 (save-place-mode 1)
 
@@ -203,6 +206,8 @@ levels to hide."
 ;;;;;;;;;;;;;;
 
 (require 'package)
+;; If you have trouble finding a package on Melpa, then maybe you need to refresh your
+;; package-list-packages buffer.
 (add-to-list 'package-archives ;; nightly builds from GitHub
              '("melpa" . "https://melpa.org/packages/"))
 ;; (add-to-list 'package-archives ;; "stable" versions - sometimes not actually updated
@@ -302,7 +307,7 @@ levels to hide."
    "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
   :config
   ;; open files as ipython notebooks automagically
-  (add-hook 'find-file-hook 'ein:maybe-open-file-as-notebook)
+  (add-hook 'ein:ipynb-mode-hook 'ein:maybe-open-file-as-notebook)
   :custom
   (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
   (ein:complete-on-dot t)
@@ -390,6 +395,12 @@ levels to hide."
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
+;; for this to work you need both fira-code font and fira-symbols installed.
+;; see https://github.com/tonsky/FiraCode/issues/211#issuecomment-239058632
+(use-package fira-code-mode
+  :custom (fira-code-mode-disabled-ligatures '("[]" "x", "or", "and"))
+  :hook prog-mode)
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; LOCAL PACKAGES ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -457,6 +468,8 @@ levels to hide."
   (interactive)
   (org-preview-latex-fragment 16))
 
+
+
 (defun org-increase-latex-preview-scale (scale)
   "Rescale latex previews in a buffer. The usual scaling is tiny."
   (interactive "nScale latex previews to: ")
@@ -521,7 +534,7 @@ levels to hide."
 ;; ridiculous next to it. So, the question is, how can I set the default weight to light
 ;; and the bold stuff to medium weight? That would be optimal.
 (set-face-attribute 'default nil
-                    :height 140
+                    :height 145
                     :family "Fira Code Light"
                     :weight 'medium)
 
