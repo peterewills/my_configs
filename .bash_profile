@@ -39,12 +39,15 @@ list_versions () {
 #############################
 
 export STITCHFIX_USER_EMAIL=peter.wills@stitchfix.com
+export STITCHFIX_OWNER_ID=peter.wills
 export SF_ENV=prod  # something about bumblebee... I dunno
 export VAULT_ADDR=https://hvault.vertigo.stitchfix.com
 export JYN_DEV_LOADER=true
 
 # pip install --user puts stuff in this bin
 export PATH="/Users/peterwills/.local/bin:$PATH"
+# MacPorts Installer addition on 2019-08-28_at_11:41:08: adding an appropriate PATH variable for use with MacPorts.
+export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 
 # STFU terminal, I like bash
 export BASH_SILENCE_DEPRECATION_WARNING=1
@@ -89,7 +92,7 @@ HISTFILESIZE=10000000
 # ### OTHER ###
 # #############
 
-# # pyenv initialization
+# pyenv initialization
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
@@ -101,10 +104,3 @@ fi
 source ~/.git-completion.bash
 # Tokens we don't want to push to GitHub :facepalm:
 source ~/.tokens
-
-##
-# Your previous /Users/peterwills/.bash_profile file was backed up as /Users/peterwills/.bash_profile.macports-saved_2019-08-28_at_11:41:08
-##
-# MacPorts Installer addition on 2019-08-28_at_11:41:08: adding an appropriate PATH variable for use with MacPorts.
-export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-# Finished adapting your PATH environment variable for use with MacPorts.
