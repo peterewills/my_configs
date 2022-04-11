@@ -106,10 +106,10 @@
 ;; I should really think through where I want to put my binaries and get them
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
-(add-to-exec-path "/Users/peterwills/.local/bin")
+(add-to-exec-path "/Users/peterewills/.local/bin")
 ;; we prefix this to the path to guarantee that the python that gets used is the one
 ;; defined by pyenv, not /usr/bin/python
-(prefix-to-exec-path "/Users/peterwills/.pyenv/shims")
+(prefix-to-exec-path "/Users/peterewills/.pyenv/shims")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -279,8 +279,8 @@ levels to hide."
   ;; "wrap". For comments you can use M-q as usual.
   (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   :custom
-  (elpy-rpc-python-command "/Users/peterwills/.pyenv/versions/3.7.8/bin/python")
-  (python-shell-interpreter "/Users/peterwills/.pyenv/versions/3.7.8/bin/python")
+  ;; (elpy-rpc-python-command "/Users/peterewills/.pyenv/versions/3.7.8/bin/python")
+  ;; (python-shell-interpreter "/Users/peterewills/.pyenv/versions/3.7.8/bin/python")
   (elpy-rpc-backend "jedi"))
 
 (use-package python-black
@@ -303,8 +303,8 @@ levels to hide."
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
   ;; (package-generate-autoloads "ein" "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
-  (load-file
-   "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
+  ;; (load-file
+  ;;  "/Users/peterewills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'ein:ipynb-mode-hook 'ein:maybe-open-file-as-notebook)
@@ -406,42 +406,42 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;
 
 
-;; SQL-PRESTO ;;
-(use-package sql-presto
-  :ensure nil
-  :load-path "/Users/peterwills/.emacs.d/lisp/sql-prestodb/src/"
-  :init
-  ;; make it easy to connect a buffer to an interactive presto session
-  (global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
-  :custom
-  ;; configs to connect to SF's presto server
-  (sql-server "http://presto.vertigo.stitchfix.com:8889")
-  (sql-database "hive")
-  ;; run presto via this special SF thing to work with Presto-Guard
-  (sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar"))
+;; ;; SQL-PRESTO ;;
+;; (use-package sql-presto
+;;   :ensure nil
+;;   :load-path "/Users/peterwills/.emacs.d/lisp/sql-prestodb/src/"
+;;   :init
+;;   ;; make it easy to connect a buffer to an interactive presto session
+;;   (global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
+;;   :custom
+;;   ;; configs to connect to SF's presto server
+;;   (sql-server "http://presto.vertigo.stitchfix.com:8889")
+;;   (sql-database "hive")
+;;   ;; run presto via this special SF thing to work with Presto-Guard
+;;   (sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar"))
 
-;; SPHINX-DOC ;;
+;; ;; SPHINX-DOC ;;
 
-;; Included support for type-hints. Do C-c M-d to insert docstrings for
-;; functions.
-(use-package sphinx-doc
-  :ensure nil
-  :load-path "/Users/peterwills/.emacs.d/lisp/sphinx-doc.el/"
-  :init
-  (diminish 'sphinx-doc-mode)
-  (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
-  :custom
-  (sphinx-doc-all-arguments t)
-  (sphinx-doc-include-types nil))
+;; ;; Included support for type-hints. Do C-c M-d to insert docstrings for
+;; ;; functions.
+;; (use-package sphinx-doc
+;;   :ensure nil
+;;   :load-path "/Users/peterwills/.emacs.d/lisp/sphinx-doc.el/"
+;;   :init
+;;   (diminish 'sphinx-doc-mode)
+;;   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
+;;   :custom
+;;   (sphinx-doc-all-arguments t)
+;;   (sphinx-doc-include-types nil))
 
-;; OX-JEKYLL-LITE ;;
+;; ;; OX-JEKYLL-LITE ;;
 
-;; markdown exporter for org mode that plays nice with jekyll
-(use-package ox-jekyll-lite
-  :ensure nil
-  :load-path "/Users/peterwills/.emacs.d/lisp/ox-jekyll-lite/"
-  :custom
-  (org-jekyll-project-root "/Users/peterwills/code/jekyll/peterewills.github.io"))
+;; ;; markdown exporter for org mode that plays nice with jekyll
+;; (use-package ox-jekyll-lite
+;;   :ensure nil
+;;   :load-path "/Users/peterewills/.emacs.d/lisp/ox-jekyll-lite/"
+;;   :custom
+;;   (org-jekyll-project-root "/Users/peterewills/code/jekyll/peterewills.github.io"))
 
 ;;;;;;;;;;;;;;
 ;; ORG MODE ;;
@@ -543,7 +543,7 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(find-file "/Users/peterwills/Dropbox/org/work.org")
+;; (find-file "/Users/peterwills/Dropbox/org/work.org")
 ;; saving your place in org files is kinda weird, cause then when they reopen the tree
 ;; doesn't quite display correctly - it doesn't unfold in a "natural" way. So, just
 ;; don't wave place in this file.

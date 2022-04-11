@@ -16,22 +16,6 @@ ln -s ~/.config/my_configs/.bash_profile ~/.bash_profile
 I store sensitive tokens and keys in `~/.tokens`. Right now it's just the circle CI
 token. For a new machine, probably best to re-generate these.
 
-### Artifactory
-
-Put the following in the `.pypirc` file:
-
-```
-[distutils]
-index-servers = sf-user-libs
-
-[sf-user-libs]
-repository: http://artifactory.vertigo.stitchfix.com/artifactory/api/pypi/sf-user-libs
-username: peterwills
-password: p4ssw0rd
-```
-
-But, you know, with your real password. It should be your LDAP password... I think?
-
 ### Terminal style
 
 Go into terminal preferences, and select "Import" from the bottom gear thing of
@@ -77,15 +61,14 @@ Install the [universal emacs OSX binaries](https://emacsformacosx.com/); this
 will allow you to put the app on the dock, so it's more app-y and less
 command-utility-y.
 
-**My `.emacs` does not work with emacs 27 right now. Download 26.X, or figure out why
-`sql-presto` is broken.**
-
 Do this after you set up your keybindings, since then you'll have the meta key
 set to the apple key as you're used to.
 
 Then, put your `.emacs` in place: `ln -s ./.emacs ~/.emacs`. This _should_ be
 plug-and-play, save for getting Zenburn from github, which is outlined in the
 `.emacs` file itself.
+
+You will also need to install Fira Code if that's still the font in use.
 
 For nano-emacs, you'll need to clone [this
 repo](https://github.com/peterewills/nano-emacs) and make sure that it's in the right
