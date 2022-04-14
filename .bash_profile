@@ -31,6 +31,11 @@ list_versions () {
     pip install $1==100.100.100.foobar --use-deprecated=legacy-resolver
 }
 
+# add brew to path
+if [[ -x /opt/homebrew/bin/brew ]]; then
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 #############################
 ### ENVIRONMENT VARIABLES ###
 #############################
@@ -39,6 +44,7 @@ list_versions () {
 export PATH="/Users/peterewills/.local/bin:$PATH"
 # MacPorts Installer addition on 2019-08-28_at_11:41:08: adding an appropriate PATH variable for use with MacPorts.
 export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+
 
 # STFU terminal, I like bash
 export BASH_SILENCE_DEPRECATION_WARNING=1
@@ -83,15 +89,23 @@ HISTFILESIZE=10000000
 # ### OTHER ###
 # #############
 
-# # pyenv initialization
-# if command -v pyenv 1>/dev/null 2>&1; then
-#   eval "$(pyenv init -)"
-#   eval "$(pyenv virtualenv-init -)"
-# fi
-
 # get this file from
 #
 #  https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 source ~/.git-completion.bash
 # Tokens we don't want to push to GitHub :facepalm:
 source ~/.tokens
+
+
+# define an env var for the path to source, our monorepo
+export SOURCE=$HOME/code/source
+# a bunch of abnormal-specific bash tooling
+. $SOURCE/tools/dev/common_bash_includes
+
+# activate the virtual environment defined in source whenever we start up a shell
+export VENV="$SOURCE/.venv"
+source "$VENV/bin/activate"
+
+# see https://www.logcg.com/en/archives/3548.htmlq
+export CPATH="/opt/homebrew/include/"
+export HDF5_DIR=/opt/homebrew/

@@ -65,8 +65,8 @@
               fill-column 88) ;; PEP8 >_<
 
 ;; Default shell in term
-(setq-default shell-file-name "/bin/bash")
-(setq explicit-shell-file-name "/bin/bash")
+(setq-default shell-file-name "/opt/homebrew/bin/bash")
+(setq explicit-shell-file-name "/opt/homebrew/bin/bash")
 
 ;; always do y-or-n
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -107,9 +107,10 @@
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
 (add-to-exec-path "/Users/peterewills/.local/bin")
+(add-to-exec-path "/opt/homebrew/bin")
 ;; we prefix this to the path to guarantee that the python that gets used is the one
 ;; defined by pyenv, not /usr/bin/python
-(prefix-to-exec-path "/Users/peterewills/.pyenv/shims")
+;; (prefix-to-exec-path "/Users/peterewills/.pyenv/shims")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -281,7 +282,8 @@ levels to hide."
   :custom
   ;; (elpy-rpc-python-command "/Users/peterewills/.pyenv/versions/3.7.8/bin/python")
   ;; (python-shell-interpreter "/Users/peterewills/.pyenv/versions/3.7.8/bin/python")
-  (elpy-rpc-backend "jedi"))
+  (elpy-rpc-backend "jedi")
+  (elpy-rpc-virtualenv-path "/Users/peterewills/code/source/.venv"))
 
 (use-package python-black
   :demand t
@@ -347,6 +349,12 @@ levels to hide."
 
 ;; Project-wide search & replace
 (use-package projectile
+  ;; When I implement projectile-global-mode then in elpy "p" gets bound to the
+  ;; projectile-command-map, which obviously is annoying since that means I can't type
+  ;; the letter p. I should try and figure out how to undo that binding; without
+  ;; projectile-global-mode I can't do projectile-find-file.
+  ;; :init
+  ;; (projectile-global-mode)
   ;; Useful Commands:
   ;;    C-c p s g  Run grep on the files in the project.
   ;;    C-c p r  Runs interactive query-replace on all files in the projects.
@@ -389,6 +397,9 @@ levels to hide."
 (use-package markdown-mode
   :custom (markdown-enable-math t))
 
+(use-package thrift
+  :custom (thrift-indent-level 4))
+
 (use-package yaml-mode)
 
 ;; lololol
@@ -397,9 +408,9 @@ levels to hide."
 
 ;; for this to work you need both fira-code font and fira-symbols installed.
 ;; see https://github.com/tonsky/FiraCode/issues/211#issuecomment-239058632
-(use-package fira-code-mode
-  :custom (fira-code-mode-disabled-ligatures '("[]" "x", "or", "and"))
-  :hook prog-mode)
+;; (use-package fira-code-mode
+;;   :custom (fira-code-mode-disabled-ligatures '("[]" "x", "or", "and"))
+;;   :hook prog-mode)
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; LOCAL PACKAGES ;;
@@ -455,8 +466,7 @@ levels to hide."
       ;; indent rather than showing all the stars
       org-startup-indented t
       org-hide-emphasis-markers t ;; don't show stars for bold, or whatever.
-      org-agenda-files (list "/Users/peterwills/Dropbox/org/work.org"
-                             "/Users/peterwills/Dropbox/org/home.org")
+      org-agenda-files (list "/Users/peterewills/org/work.org")
       org-image-actual-width nil ;; allow images to be resize
       )
 
@@ -543,7 +553,7 @@ levels to hide."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; (find-file "/Users/peterwills/Dropbox/org/work.org")
+;; (find-file "/Users/peterewills/work.org")
 ;; saving your place in org files is kinda weird, cause then when they reopen the tree
 ;; doesn't quite display correctly - it doesn't unfold in a "natural" way. So, just
 ;; don't wave place in this file.
