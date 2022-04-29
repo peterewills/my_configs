@@ -23,6 +23,14 @@ alias jphtml='jupyter nbconvert --to html'
 alias jpscript='jupyter nbconvert --to script'
 alias ipdb='python -m ipdb -c continue'
 
+# we have flake8 installed in a special virtual environment, so that it can be used
+# across all venvs. mostly this is just for use in emacs, so this alias probably won't
+# really get used much, but I'm adding it here just in case.
+alias flake8='/Users/peterewills/.flake8_venv/bin/flake8'
+
+# Quick way to run things via aws-vault
+alias awsv='aws-vault exec prod-eng -- aws'
+
 list_versions () {
     # list the available versions of a python package. don't just do `pip install ==`
     # without a version number, because then it can install version 0.0 we assume that
@@ -48,6 +56,7 @@ export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 
 # STFU terminal, I like bash
 export BASH_SILENCE_DEPRECATION_WARNING=1
+export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 ######################
 ### COMMAND PROMPT ###
@@ -109,3 +118,5 @@ source "$VENV/bin/activate"
 # see https://www.logcg.com/en/archives/3548.htmlq
 export CPATH="/opt/homebrew/include/"
 export HDF5_DIR=/opt/homebrew/
+
+# tfenv use 0.12.31

@@ -108,6 +108,8 @@
 (add-to-exec-path "/usr/local/bin")
 (add-to-exec-path "/Users/peterewills/.local/bin")
 (add-to-exec-path "/opt/homebrew/bin")
+
+(add-to-exec-path "/Users/peterewills/.flake8_venv/bin")
 ;; we prefix this to the path to guarantee that the python that gets used is the one
 ;; defined by pyenv, not /usr/bin/python
 ;; (prefix-to-exec-path "/Users/peterewills/.pyenv/shims")
@@ -353,16 +355,29 @@ levels to hide."
   ;; projectile-command-map, which obviously is annoying since that means I can't type
   ;; the letter p. I should try and figure out how to undo that binding; without
   ;; projectile-global-mode I can't do projectile-find-file.
-  ;; :init
-  ;; (projectile-global-mode)
+  :init
+  (projectile-mode)
   ;; Useful Commands:
   ;;    C-c p s g  Run grep on the files in the project.
   ;;    C-c p r  Runs interactive query-replace on all files in the projects.
   ;;    C-c p C-h (shows all projectile bindings)
   :bind-keymap ("C-c p" . projectile-command-map)
+  ;; just so I can turn off projectile mode if it gets buggy. TODO remove this once
+  ;; things work nicely
+  :bind ("C-c C-q" . projectile-mode)
   :config
   (setq projectile-enable-caching t)
   (setq projectile-switch-project-action 'projectile-dired))
+
+(use-package helm-rg)
+
+(use-package helm-projectile
+  :bind
+  ;; replace projectile's default grepping and find-file with helm-projectile variants,
+  ;; which are much more useful.
+  (:map projectile-command-map
+        ("f" . helm-projectile-find-file)
+        ("s g" . helm-projectile-rg)))
 
 
 ;; Allows multiple cursors. Highlight region, then use C-S-c C-S-c.
