@@ -61,7 +61,7 @@
 (setq-default truncate-lines t ;; truncate rather than wrap lines
               auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
               indent-tabs-mode nil ;; use spaces
-              tab-width 4 ;; always 4
+              tab-width 2 ;; hurts my soul, but this is standard at abnormal
               fill-column 88) ;; PEP8 >_<
 
 ;; Default shell in term
@@ -108,6 +108,7 @@
 (add-to-exec-path "/usr/local/bin")
 (add-to-exec-path "/Users/peterewills/.local/bin")
 (add-to-exec-path "/opt/homebrew/bin")
+(add-to-exec-path "/Users/peterewills/code/source/.venv/bin/")
 
 (add-to-exec-path "/Users/peterewills/.flake8_venv/bin")
 ;; we prefix this to the path to guarantee that the python that gets used is the one
@@ -431,21 +432,6 @@ levels to hide."
 ;; LOCAL PACKAGES ;;
 ;;;;;;;;;;;;;;;;;;;;
 
-
-;; ;; SQL-PRESTO ;;
-;; (use-package sql-presto
-;;   :ensure nil
-;;   :load-path "/Users/peterwills/.emacs.d/lisp/sql-prestodb/src/"
-;;   :init
-;;   ;; make it easy to connect a buffer to an interactive presto session
-;;   (global-set-key (kbd "C-x M-P") 'sql-presto-scratch)
-;;   :custom
-;;   ;; configs to connect to SF's presto server
-;;   (sql-server "http://presto.vertigo.stitchfix.com:8889")
-;;   (sql-database "hive")
-;;   ;; run presto via this special SF thing to work with Presto-Guard
-;;   (sql-presto-program "/Users/peterwills/jars/sf-presto-cli-318-executable.jar"))
-
 ;; ;; SPHINX-DOC ;;
 
 ;; ;; Included support for type-hints. Do C-c M-d to insert docstrings for
@@ -540,6 +526,33 @@ levels to hide."
 ;; I use the portions of this that focus on appearance.
 
 ;; (load-file "/Users/peterwills/code/elisp/nano-emacs/nano-init.el")
+
+;;;;;;;;;;;;;;
+;; SQL MODE ;;
+;;;;;;;;;;;;;;
+
+(load "~/secrets") ;; passwords can be stored in this file
+;; this should contain something that looks like
+;;
+;; (setq sql-connection-alist
+;;       '((messages-prod (sql-product 'mysql)
+;;                        (sql-port 33060)
+;;                        (sql-server "messages-prod-ro.cbuy4y6lzmol.us-east-1.rds.amazonaws.com")
+;;                        (sql-user "messages_user")
+;;                        (sql-password "foobar")
+;;                        (sql-database "messages"))))
+
+(defun sql-connect-to-messages-prod ()
+  (interactive)
+  (sql-connect 'messages-prod "*messages-prod*"))
+
+(defun sql-open-sql-scratch ()
+  (interactive)
+  (sql-connect-to-messages-prod)
+  (switch-to-buffer "*messages-prod-scratch*")
+  (sql-mode)
+  ;; the non-interactive version of sql-set-sqli-buffer
+  (setq sql-buffer "*messages-prod*"))
 
 ;;;;;;;;;;;;;;;;
 ;; APPEARANCE ;;

@@ -119,4 +119,10 @@ source "$VENV/bin/activate"
 export CPATH="/opt/homebrew/include/"
 export HDF5_DIR=/opt/homebrew/
 
+alias adhoc_build='aws-vault exec prod-eng -- python $SOURCE/src/py/abnormal/tools/rescore_tools/spark_rt_rescore.py build --identifier pwills --override_existing_deployment'
+alias adhoc_end='aws-vault exec prod-eng -- python $SOURCE/src/py/abnormal/tools/rescore_tools/spark_rt_rescore.py end --identifier pwills'
+alias adhoc_score_1s='aws-vault exec prod-eng -- python $SOURCE/src/py/abnormal/tools/rescore_tools/rt_rescore.py score pwills --start_time "2022-04-01 04:00:00" --interval 1S'
+
+export ABNORMAL_USER=pwills
+
 # tfenv use 0.12.31
