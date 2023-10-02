@@ -11,6 +11,11 @@ alias cdu='cd ..'
 alias cdb='cd -'
 alias ll='ls -alFh'
 
+# the true location of python 3.11 as installed by brew
+alias python='/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11'
+alias python3='/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11'
+alias pip='pip3.11'
+
 # make enconding work nicely with python 3
 export LS_ALL=en_US.utf-8
 export LANG=en_US.utf-8
@@ -52,6 +57,8 @@ fi
 export PATH="/Users/peterewills/.local/bin:$PATH"
 # MacPorts Installer addition on 2019-08-28_at_11:41:08: adding an appropriate PATH variable for use with MacPorts.
 export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+# # Add python3 to path, since I'm aliasing python to python3
+# export PATH="/Users/peterwills/Library/Python/3.9/bin:$PATH"
 
 
 # STFU terminal, I like bash
@@ -104,25 +111,3 @@ HISTFILESIZE=10000000
 source ~/.git-completion.bash
 # Tokens we don't want to push to GitHub :facepalm:
 source ~/.tokens
-
-
-# define an env var for the path to source, our monorepo
-export SOURCE=$HOME/code/source
-# a bunch of abnormal-specific bash tooling
-. $SOURCE/tools/dev/common_bash_includes
-
-# activate the virtual environment defined in source whenever we start up a shell
-export VENV="$SOURCE/.venv"
-source "$VENV/bin/activate"
-
-# see https://www.logcg.com/en/archives/3548.htmlq
-export CPATH="/opt/homebrew/include/"
-export HDF5_DIR=/opt/homebrew/
-
-alias adhoc_build='aws-vault exec prod-eng -- python $SOURCE/src/py/abnormal/tools/rescore_tools/spark_rt_rescore.py build --identifier pwills --override_existing_deployment'
-alias adhoc_end='aws-vault exec prod-eng -- python $SOURCE/src/py/abnormal/tools/rescore_tools/spark_rt_rescore.py end --identifier pwills'
-alias adhoc_score_1s='aws-vault exec prod-eng -- python $SOURCE/src/py/abnormal/tools/rescore_tools/rt_rescore.py score pwills --start_time "2022-04-01 04:00:00" --interval 1S'
-
-export ABNORMAL_USER=pwills
-
-# tfenv use 0.12.31

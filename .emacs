@@ -65,8 +65,8 @@
               fill-column 88) ;; PEP8 >_<
 
 ;; Default shell in term
-(setq-default shell-file-name "/opt/homebrew/bin/bash")
-(setq explicit-shell-file-name "/opt/homebrew/bin/bash")
+(setq-default shell-file-name "/bin/bash")
+(setq explicit-shell-file-name "/bin/bash")
 
 ;; always do y-or-n
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -205,6 +205,27 @@ levels to hide."
         (local-set-key (kbd "M-n") #'smerge-next)
         (local-set-key (kbd "M-p") #'smerge-prev)))
 
+;;;;;;;;;;;;;;;;
+;; APPEARANCE ;;
+;;;;;;;;;;;;;;;;
+
+;; run this stuff after nano so that it takes precedence
+
+;; window should fill half the screen width-wise, and be full-height
+(add-to-list 'initial-frame-alist '(width . 0.5))
+(add-to-list 'initial-frame-alist '(height . 1.0))
+
+;; highlight current line
+(global-hl-line-mode 1)
+(set-face-background 'hl-line "#393939")
+
+;; I'd prefer to have the weight be light, but then the bold stuff really looks
+;; ridiculous next to it. So, the question is, how can I set the default weight to light
+;; and the bold stuff to medium weight? That would be optimal.
+(set-face-attribute 'default nil
+                    :height 145
+                    :family "Fira Code Light"
+                    :weight 'medium)
 ;;;;;;;;;;;;;;
 ;; PACKAGES ;;
 ;;;;;;;;;;;;;;
@@ -283,10 +304,10 @@ levels to hide."
   ;; "wrap". For comments you can use M-q as usual.
   (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   :custom
-  ;; (elpy-rpc-python-command "/Users/peterewills/.pyenv/versions/3.7.8/bin/python")
-  ;; (python-shell-interpreter "/Users/peterewills/.pyenv/versions/3.7.8/bin/python")
   (elpy-rpc-backend "jedi")
-  (elpy-rpc-virtualenv-path "/Users/peterewills/code/source/.venv"))
+  (elpy-rpc-python-command "/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11")
+  (python-shell-interpreter "/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11")
+  (elpy-rpc-virtualenv-path 'system))
 
 (use-package python-black
   :demand t
@@ -340,7 +361,7 @@ levels to hide."
 (use-package helm
   :diminish helm-mode ;; don't show in mode-list
   :init
-  (require 'helm-config)
+  ;; (require 'helm-config)
   (setq helm-candidate-number-limit 100
         helm-buffer-max-length nil)
   (helm-mode)
@@ -398,6 +419,7 @@ levels to hide."
   :init
   (ac-config-default)
   (global-auto-complete-mode t)
+  (setq ac-use-comphist nil) ;; turn off history since it's brutally slow on kill
   ;; no company in elpy
   (add-hook 'elpy-mode-hook (lambda () (company-mode -1))))
 
@@ -448,7 +470,11 @@ levels to hide."
 
 ;; ;; OX-JEKYLL-LITE ;;
 
-;; ;; markdown exporter for org mode that plays nice with jekyll
+;; markdown exporter for org mode that plays nice with jekyll
+;; (why doesn't use-package work for this? not sure...)
+(add-to-list 'load-path "~/.emacs.d/lisp/ox-jekyll-lite/")
+(require 'ox-jekyll-lite)
+(setq org-jekyll-project-root "/Users/peterewills/code/jekyll/peterewills.github.io")
 ;; (use-package ox-jekyll-lite
 ;;   :ensure nil
 ;;   :load-path "/Users/peterewills/.emacs.d/lisp/ox-jekyll-lite/"
@@ -532,6 +558,10 @@ levels to hide."
 ;;;;;;;;;;;;;;
 
 (load "~/secrets") ;; passwords can be stored in this file
+
+;; this is my old config for connecting to the mysql server at abnormal. Leaving this
+;; here in case it's instructive for future applications
+
 ;; this should contain something that looks like
 ;;
 ;; (setq sql-connection-alist
@@ -542,47 +572,27 @@ levels to hide."
 ;;                        (sql-password "foobar")
 ;;                        (sql-database "messages"))))
 
-(defun sql-connect-to-messages-prod ()
-  (interactive)
-  (sql-connect 'messages-prod "*messages-prod*"))
+;; (defun sql-connect-to-messages-prod ()
+;;   (interactive)
+;;   (sql-connect 'messages-prod "*messages-prod*"))
 
-(defun sql-open-sql-scratch ()
-  (interactive)
-  (sql-connect-to-messages-prod)
-  (switch-to-buffer "*messages-prod-scratch*")
-  (sql-mode)
-  ;; the non-interactive version of sql-set-sqli-buffer
-  (setq sql-buffer "*messages-prod*"))
+;; (defun sql-open-sql-scratch ()
+;;   (interactive)
+;;   (sql-connect-to-messages-prod)
+;;   (switch-to-buffer "*messages-prod-scratch*")
+;;   (sql-mode)
+;;   ;; the non-interactive version of sql-set-sqli-buffer
+;;   (setq sql-buffer "*messages-prod*"))
 
-;;;;;;;;;;;;;;;;
-;; APPEARANCE ;;
-;;;;;;;;;;;;;;;;
 
-;; run this stuff after nano so that it takes precedence
+;;;;;;;;;;;;;
+;; STARTUP ;;
+;;;;;;;;;;;;;
 
-;; window should fill half the screen width-wise, and be full-height
-(add-to-list 'default-frame-alist '(width . 0.5))
-(add-to-list 'default-frame-alist '(height . 1.0))
-
-;; highlight current line
-(global-hl-line-mode 1)
-(set-face-background 'hl-line "#393939")
-
-;; I'd prefer to have the weight be light, but then the bold stuff really looks
-;; ridiculous next to it. So, the question is, how can I set the default weight to light
-;; and the bold stuff to medium weight? That would be optimal.
-(set-face-attribute 'default nil
-                    :height 145
-                    :family "Fira Code Light"
-                    :weight 'medium)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; OPEN MY ORG FILE AT STARTUP ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;; this opens an org file at startup. I don't use it at the moment.
 
 ;; (find-file "/Users/peterewills/work.org")
 ;; saving your place in org files is kinda weird, cause then when they reopen the tree
 ;; doesn't quite display correctly - it doesn't unfold in a "natural" way. So, just
 ;; don't wave place in this file.
-(save-place-local-mode -1)
+;; (save-place-local-mode -1)
