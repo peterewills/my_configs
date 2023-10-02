@@ -61,7 +61,6 @@
 (setq-default truncate-lines t ;; truncate rather than wrap lines
               auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
               indent-tabs-mode nil ;; use spaces
-              tab-width 2 ;; hurts my soul, but this is standard at abnormal
               fill-column 88) ;; PEP8 >_<
 
 ;; Default shell in term
@@ -305,8 +304,8 @@ levels to hide."
   (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   :custom
   (elpy-rpc-backend "jedi")
-  (elpy-rpc-python-command "/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11")
-  (python-shell-interpreter "/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11")
+  (elpy-rpc-python-command "/opt/homebrew/bin/python3")
+  (python-shell-interpreter "/opt/homebrew/bin/python3")
   (elpy-rpc-virtualenv-path 'system))
 
 (use-package python-black
@@ -470,11 +469,11 @@ levels to hide."
 
 ;; ;; OX-JEKYLL-LITE ;;
 
-;; markdown exporter for org mode that plays nice with jekyll
-;; (why doesn't use-package work for this? not sure...)
-(add-to-list 'load-path "~/.emacs.d/lisp/ox-jekyll-lite/")
-(require 'ox-jekyll-lite)
-(setq org-jekyll-project-root "/Users/peterewills/code/jekyll/peterewills.github.io")
+;; ;;  markdown exporter for org mode that plays nice with jekyll
+;; ;; (why doesn't use-package work for this? not sure...)
+;; (add-to-list 'load-path "~/.emacs.d/lisp/ox-jekyll-lite/")
+;; (require 'ox-jekyll-lite)
+;; (setq org-jekyll-project-root "/Users/peterewills/code/jekyll/peterewills.github.io")
 ;; (use-package ox-jekyll-lite
 ;;   :ensure nil
 ;;   :load-path "/Users/peterewills/.emacs.d/lisp/ox-jekyll-lite/"
@@ -484,6 +483,9 @@ levels to hide."
 ;;;;;;;;;;;;;;
 ;; ORG MODE ;;
 ;;;;;;;;;;;;;;
+
+;; this stuff might be out of date, especially the tex preview stuff - haven't played
+;; with that in quite some time.
 
 (define-key global-map (kbd "C-c l") 'org-store-link)
 (define-key global-map (kbd "C-c a") 'org-agenda)
@@ -549,15 +551,14 @@ levels to hide."
 ;; N Λ N O ;;
 ;;;;;;;;;;;;;
 
-;; I use the portions of this that focus on appearance.
+;; I used to use the portions of this that focus on appearance. Now I don't use it. You
+;; can look at my fork of the repo if you want to see how I modified it.
 
 ;; (load-file "/Users/peterwills/code/elisp/nano-emacs/nano-init.el")
 
 ;;;;;;;;;;;;;;
 ;; SQL MODE ;;
 ;;;;;;;;;;;;;;
-
-(load "~/secrets") ;; passwords can be stored in this file
 
 ;; this is my old config for connecting to the mysql server at abnormal. Leaving this
 ;; here in case it's instructive for future applications
@@ -589,9 +590,24 @@ levels to hide."
 ;; STARTUP ;;
 ;;;;;;;;;;;;;
 
-;; this opens an org file at startup. I don't use it at the moment.
+;; window should fill half the screen width-wise, and be full-height
+(setq default-frame-alist
+       '((height . 1.0)
+         (width . 0.5)
+         (left . 0)
+         (top . 0)
+         ;; some configs that are available, but I don't use
+         ;; (vertical-scroll-bars . nil)
+         ;; (horizontal-scroll-bars . nil)
+         ;; (tool-bar-lines . 0)
+         ))
 
+
+(load "~/secrets") ;; passwords can be stored in this file
+
+;; this opens an org file at startup. I don't use it at the moment.
 ;; (find-file "/Users/peterewills/work.org")
+
 ;; saving your place in org files is kinda weird, cause then when they reopen the tree
 ;; doesn't quite display correctly - it doesn't unfold in a "natural" way. So, just
 ;; don't wave place in this file.

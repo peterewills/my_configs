@@ -12,9 +12,8 @@ alias cdb='cd -'
 alias ll='ls -alFh'
 
 # the true location of python 3.11 as installed by brew
-alias python='/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11'
-alias python3='/usr/local/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11'
-alias pip='pip3.11'
+alias python='/opt/homebrew/bin/python3'
+alias pip='/opt/homebrew/bin/pip3'
 
 # make enconding work nicely with python 3
 export LS_ALL=en_US.utf-8

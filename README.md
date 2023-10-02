@@ -1,7 +1,42 @@
 # Installing Configs
 
 My general approach is to link the expected location of the configuration files
-to this directory, which I assume is cloned into `~/.config/my_configs`.
+to this directory.
+
+### Get the repo
+
+Clone it into `~/.config/my_configs`:
+
+```
+cd ~
+mkdir .config
+cd .config
+git clone https://github.com/peterewills/my_configs.git
+```
+
+You may have to install xcode - even if it prompts you at first, you might have to do it
+again via `xcode-select --install`.
+
+### Homebrew
+
+Install homebrew, as per the instructions on their website.
+
+
+### Python
+
+The default would be to `brew install python@whatever` and then create aliases in your
+`.bash_profile`, e.g.
+
+```
+alias python='/opt/homebrew/bin/python3'
+alias pip='/opt/homebrew/bin/pip3'
+```
+
+Then do
+
+```
+pip install jupyter flake8 jedi autopep8 yapf
+```
 
 ### Bash profile
 
@@ -9,6 +44,14 @@ From this repo's root, do
 
 ```
 ln -s ~/.config/my_configs/.bash_profile ~/.bash_profile
+```
+
+### Tmux
+
+`brew install tmux`, then put the tmux config in place:
+
+```
+ln -s ~/.config/my_configs/.tmux.conf ~/.tmux.conf
 ```
 
 ### Tokens
@@ -64,7 +107,7 @@ command-utility-y.
 Do this after you set up your keybindings, since then you'll have the meta key
 set to the apple key as you're used to.
 
-Then, put your `.emacs` in place: `ln -s ./.emacs ~/.emacs`. This _should_ be
+Then, put your `.emacs` in place: `ln -s ~/.config/my_configs/.emacs ~/.emacs`. This _should_ be
 plug-and-play, save for getting Zenburn from github, which is outlined in the
 `.emacs` file itself.
 
@@ -73,7 +116,9 @@ You will also need to install Fira Code if that's still the font in use.
 For nano-emacs, you'll need to clone [this
 repo](https://github.com/peterewills/nano-emacs) and make sure that it's in the right
 place for your .emacs file; look for the call to `load-file`, which is what initializes
-the nano-stuff. Install Roboto-Mono and Fira-Code fonts.
+the nano-stuff.
+
+Install Roboto-Mono and Fira-Code fonts.
 
 ### Git
 
@@ -91,17 +136,6 @@ of using your github password.
 
 I've included my QMK keyboard firmware JSON in here, as well. You can go to the [QMK
 configurator](https://config.qmk.fm/#) and load it to play around.
-
-### pyenv
-
-Install pyenv, and make sure that 3.7.8 is your default, but that **you have some 3.6.X
-version available**. I think it's sidecar that needs it.
-
-### jars
-
-You should have both `presto-jdbc-0.219.jar` and `sf-presto-cli-318-executable.jar` in
-your `~/jars` directory. Ask in #algo-help if you need new versions of these.
-
 
 ### Other Stuff
 
