@@ -139,27 +139,6 @@
 (global-set-key (kbd "C-M-s") 'isearch-forward)
 (global-set-key (kbd "C-M-r") 'isearch-backward)
 
-;; hideshow mode, rebind map to C-c h. Hiding levels still doesn't do quite what I want,
-;; but I'm working on it :)
-(defun hs-hide-n-levels ()
-  "Interacitve hide-levels, prompting the user for number of
-levels to hide."
-  (interactive)
-  (hs-hide-level
-   (string-to-number
-    (read-string "Enter levels to hide: "))))
-
-(global-set-key (kbd "C-<tab>") 'hs-toggle-hiding)
-(global-set-key (kbd "C-c h b") 'hs-hide-block)
-(global-set-key (kbd "C-c h s") 'hs-show-block)
-(global-set-key (kbd "C-c h h") 'hs-hide-all)
-(global-set-key (kbd "C-c h a") 'hs-show-all)
-(global-set-key (kbd "C-c h n") 'hs-hide-n-levels)
-(global-set-key (kbd "C-c h 1") (lambda () (interactive) (hs-hide-level 1)))
-(global-set-key (kbd "C-c h 2") (lambda () (interactive) (hs-hide-level 2)))
-(global-set-key (kbd "C-c h 3") (lambda () (interactive) (hs-hide-level 3)))
-
-
 ;; cause I <3 comment boxes
 (global-set-key (kbd "C-c c b") 'comment-box)
 
@@ -208,11 +187,17 @@ levels to hide."
 ;; APPEARANCE ;;
 ;;;;;;;;;;;;;;;;
 
-;; run this stuff after nano so that it takes precedence
-
 ;; window should fill half the screen width-wise, and be full-height
-(add-to-list 'initial-frame-alist '(width . 0.5))
-(add-to-list 'initial-frame-alist '(height . 1.0))
+(setq default-frame-alist
+       '((height . 1.0)
+         (width . 0.5)
+         (left . 0)
+         (top . 0)
+         ;; some configs that are available, but I don't use
+         ;; (vertical-scroll-bars . nil)
+         ;; (horizontal-scroll-bars . nil)
+         ;; (tool-bar-lines . 0)
+         ))
 
 ;; highlight current line
 (global-hl-line-mode 1)
@@ -443,43 +428,6 @@ levels to hide."
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
-;; for this to work you need both fira-code font and fira-symbols installed.
-;; see https://github.com/tonsky/FiraCode/issues/211#issuecomment-239058632
-;; (use-package fira-code-mode
-;;   :custom (fira-code-mode-disabled-ligatures '("[]" "x", "or", "and"))
-;;   :hook prog-mode)
-
-;;;;;;;;;;;;;;;;;;;;
-;; LOCAL PACKAGES ;;
-;;;;;;;;;;;;;;;;;;;;
-
-;; ;; SPHINX-DOC ;;
-
-;; ;; Included support for type-hints. Do C-c M-d to insert docstrings for
-;; ;; functions.
-;; (use-package sphinx-doc
-;;   :ensure nil
-;;   :load-path "/Users/peterwills/.emacs.d/lisp/sphinx-doc.el/"
-;;   :init
-;;   (diminish 'sphinx-doc-mode)
-;;   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode t)))
-;;   :custom
-;;   (sphinx-doc-all-arguments t)
-;;   (sphinx-doc-include-types nil))
-
-;; ;; OX-JEKYLL-LITE ;;
-
-;; ;;  markdown exporter for org mode that plays nice with jekyll
-;; ;; (why doesn't use-package work for this? not sure...)
-;; (add-to-list 'load-path "~/.emacs.d/lisp/ox-jekyll-lite/")
-;; (require 'ox-jekyll-lite)
-;; (setq org-jekyll-project-root "/Users/peterewills/code/jekyll/peterewills.github.io")
-;; (use-package ox-jekyll-lite
-;;   :ensure nil
-;;   :load-path "/Users/peterewills/.emacs.d/lisp/ox-jekyll-lite/"
-;;   :custom
-;;   (org-jekyll-project-root "/Users/peterewills/code/jekyll/peterewills.github.io"))
-
 ;;;;;;;;;;;;;;
 ;; ORG MODE ;;
 ;;;;;;;;;;;;;;
@@ -548,67 +496,7 @@ levels to hide."
 (diminish 'org-indent-mode)
 
 ;;;;;;;;;;;;;
-;; N Λ N O ;;
-;;;;;;;;;;;;;
-
-;; I used to use the portions of this that focus on appearance. Now I don't use it. You
-;; can look at my fork of the repo if you want to see how I modified it.
-
-;; (load-file "/Users/peterwills/code/elisp/nano-emacs/nano-init.el")
-
-;;;;;;;;;;;;;;
-;; SQL MODE ;;
-;;;;;;;;;;;;;;
-
-;; this is my old config for connecting to the mysql server at abnormal. Leaving this
-;; here in case it's instructive for future applications
-
-;; this should contain something that looks like
-;;
-;; (setq sql-connection-alist
-;;       '((messages-prod (sql-product 'mysql)
-;;                        (sql-port 33060)
-;;                        (sql-server "messages-prod-ro.cbuy4y6lzmol.us-east-1.rds.amazonaws.com")
-;;                        (sql-user "messages_user")
-;;                        (sql-password "foobar")
-;;                        (sql-database "messages"))))
-
-;; (defun sql-connect-to-messages-prod ()
-;;   (interactive)
-;;   (sql-connect 'messages-prod "*messages-prod*"))
-
-;; (defun sql-open-sql-scratch ()
-;;   (interactive)
-;;   (sql-connect-to-messages-prod)
-;;   (switch-to-buffer "*messages-prod-scratch*")
-;;   (sql-mode)
-;;   ;; the non-interactive version of sql-set-sqli-buffer
-;;   (setq sql-buffer "*messages-prod*"))
-
-
-;;;;;;;;;;;;;
 ;; STARTUP ;;
 ;;;;;;;;;;;;;
 
-;; window should fill half the screen width-wise, and be full-height
-(setq default-frame-alist
-       '((height . 1.0)
-         (width . 0.5)
-         (left . 0)
-         (top . 0)
-         ;; some configs that are available, but I don't use
-         ;; (vertical-scroll-bars . nil)
-         ;; (horizontal-scroll-bars . nil)
-         ;; (tool-bar-lines . 0)
-         ))
-
-
 (load "~/secrets") ;; passwords can be stored in this file
-
-;; this opens an org file at startup. I don't use it at the moment.
-;; (find-file "/Users/peterewills/work.org")
-
-;; saving your place in org files is kinda weird, cause then when they reopen the tree
-;; doesn't quite display correctly - it doesn't unfold in a "natural" way. So, just
-;; don't wave place in this file.
-;; (save-place-local-mode -1)
