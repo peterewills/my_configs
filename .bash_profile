@@ -12,8 +12,9 @@ alias cdb='cd -'
 alias ll='ls -alFh'
 
 # the true location of python 3.11 as installed by brew
-alias python='/opt/homebrew/bin/python3'
-alias pip='/opt/homebrew/bin/pip3'
+# NOTE: I just added symlinks in /usr/local/bin instead
+# alias python='/opt/homebrew/bin/python3'
+# alias pip='/opt/homebrew/bin/pip3'
 
 # make enconding work nicely with python 3
 export LS_ALL=en_US.utf-8
@@ -53,7 +54,7 @@ fi
 #############################
 
 # pip install --user puts stuff in this bin
-export PATH="/Users/peterewills/.local/bin:$PATH"
+export PATH="/Users/peter.wills@equipmentshare.com/.local/bin:$PATH"
 # MacPorts Installer addition on 2019-08-28_at_11:41:08: adding an appropriate PATH variable for use with MacPorts.
 export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 # # Add python3 to path, since I'm aliasing python to python3
@@ -68,18 +69,22 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 ### COMMAND PROMPT ###
 ######################
 
-# Git branch in prompt.
-parse_git_branch() {
-	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-}
-# this doesn't show user or host, to do so add "\u@\h" to beginning\
-export PS1="\[\033[96m\]\W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
+# # Git branch in prompt.
+# parse_git_branch() {
+# 	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+# }
+
+
+# # this doesn't show user or host, to do so add "\u@\h" to beginning\
+# export PS1="\[\033[96m\]\W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
+
+. ~/.bash_prompt
 
 
 
-# #################################
-# ### SUPERCHARGED BASH HISTORY ###
-# #################################
+#################################
+### SUPERCHARGED BASH HISTORY ###
+#################################
 
 # https://metaredux.com/posts/2020/07/07/supercharge-your-bash-history.html
 
@@ -99,10 +104,17 @@ HISTIGNORE="ls:ll:cd:pwd:bg:fg:history"
 HISTSIZE=100000
 HISTFILESIZE=10000000
 
+########################
+# EQUIPMENTSHARE STUFF #
+########################
 
-# #############
-# ### OTHER ###
-# #############
+# the original pAuth includes poetry configuration. I'm not using this ATM, so I removed it.
+# alias pAuth='export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain equipmentshare --domain-owner 696398453447 --query authorizationToken --output text) && poetry config http-basic.codeartifact-dev aws $CODEARTIFACT_TOKEN && poetry config http-basic.codeartifact-prod aws $CODEARTIFACT_TOKEN && aws codeartifact login --tool pip --repository dev --domain equipmentshare --domain-owner 696398453447'
+alias pAuth='aws codeartifact login --tool pip --repository dev --domain equipmentshare --domain-owner 696398453447'
+
+#############
+### OTHER ###
+#############
 
 # get this file from
 #
