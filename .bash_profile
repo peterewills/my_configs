@@ -65,23 +65,6 @@ export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-######################
-### COMMAND PROMPT ###
-######################
-
-# # Git branch in prompt.
-# parse_git_branch() {
-# 	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-# }
-
-
-# # this doesn't show user or host, to do so add "\u@\h" to beginning\
-# export PS1="\[\033[96m\]\W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
-
-. ~/.bash_prompt
-
-
-
 #################################
 ### SUPERCHARGED BASH HISTORY ###
 #################################
@@ -122,3 +105,14 @@ alias pAuth='aws codeartifact login --tool pip --repository dev --domain equipme
 source ~/.git-completion.bash
 # Tokens we don't want to push to GitHub :facepalm:
 source ~/.tokens
+
+# start up our "default" virtualenv
+source ~/code/sandbox/bin/activate
+
+
+######################
+### COMMAND PROMPT ###
+######################
+
+# abstracted out into its own file, found on the interwebs
+source ~/.bash_prompt

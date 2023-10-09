@@ -72,7 +72,7 @@ function set_virtualenv () {
   if test -z "$VIRTUAL_ENV" ; then
       PYTHON_VIRTUALENV=""
   else
-      PYTHON_VIRTUALENV="${BLUE}[`basename \"$VIRTUAL_ENV\"`]${COLOR_NONE}:"
+      PYTHON_VIRTUALENV="${BLUE}[`basename \"$VIRTUAL_ENV\"`]${COLOR_NONE}"
   fi
 }
 
@@ -90,7 +90,7 @@ function set_bash_prompt () {
 
   # Set the bash prompt variable.
   # PS1="${PYTHON_VIRTUALENV}${GREEN}\u@\h${COLOR_NONE}:${YELLOW}\w${COLOR_NONE}${BRANCH}${PROMPT_SYMBOL} "
-  PS1="${PYTHON_VIRTUALENV}${GREEN}${YELLOW}\w${COLOR_NONE}${BRANCH}${PROMPT_SYMBOL} "
+  PS1="${PYTHON_VIRTUALENV}${GREEN} \W${COLOR_NONE}${BRANCH}${PROMPT_SYMBOL} "
 }
 
 # Tell bash to execute this function just before displaying its prompt.
