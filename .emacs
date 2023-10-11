@@ -144,7 +144,7 @@
 
 ;; I want these to work both in python mode and in EIN, so I'll just set them as
 ;; global. This way they can even work in org code snippets, or markdown, or whatever
-(global-set-key (kbd "C-c b b") 'python-black)
+(global-set-key (kbd "C-c b b") 'python-black-buffer)
 (global-set-key (kbd "C-c b r") 'python-black-region)
 
 ;; configure elisp mode
@@ -289,15 +289,18 @@
   (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   :custom
   (elpy-rpc-backend "jedi")
-  (elpy-rpc-python-command "/opt/homebrew/bin/python3")
-  (python-shell-interpreter "/opt/homebrew/bin/python3")
-  (elpy-rpc-virtualenv-path 'system))
+  (elpy-rpc-python-command "/opt/homebrew/bin/python3.8")
+  (python-shell-interpreter "/opt/homebrew/bin/python3.8")
+  (elpy-rpc-virtualenv-path 'default))
 
 (use-package python-black
   :demand t
   :after python)
 
 (use-package py-isort
+  :after python)
+
+(use-package sphinx-doc
   :after python)
 
 ;; a requirement for python-pytest, doesn't get installed by default for some reason
@@ -500,3 +503,5 @@
 ;;;;;;;;;;;;;
 
 (load "~/secrets") ;; passwords can be stored in this file
+;; activate our sandbox venv by default
+(pyvenv-activate "/Users/peter.wills@equipmentshare.com/code/sandbox")

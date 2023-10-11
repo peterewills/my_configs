@@ -33,9 +33,6 @@ alias ipdb='python -m ipdb -c continue'
 # really get used much, but I'm adding it here just in case.
 alias flake8='/Users/peterewills/.flake8_venv/bin/flake8'
 
-# Quick way to run things via aws-vault
-alias awsv='aws-vault exec prod-eng -- aws'
-
 list_versions () {
     # list the available versions of a python package. don't just do `pip install ==`
     # without a version number, because then it can install version 0.0 we assume that
@@ -91,9 +88,11 @@ HISTFILESIZE=10000000
 # EQUIPMENTSHARE STUFF #
 ########################
 
+# Note: first go to https://dev-portal.internal.equipmentshare.com/saml, and get your
+# AWS creds. Copy them into your terminal; then you should be able to run pAuth.
+
 # the original pAuth includes poetry configuration. I'm not using this ATM, so I removed it.
-# alias pAuth='export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain equipmentshare --domain-owner 696398453447 --query authorizationToken --output text) && poetry config http-basic.codeartifact-dev aws $CODEARTIFACT_TOKEN && poetry config http-basic.codeartifact-prod aws $CODEARTIFACT_TOKEN && aws codeartifact login --tool pip --repository dev --domain equipmentshare --domain-owner 696398453447'
-alias pAuth='aws codeartifact login --tool pip --repository dev --domain equipmentshare --domain-owner 696398453447'
+alias pAuth='export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain equipmentshare --domain-owner 696398453447 --query authorizationToken --output text) && poetry config http-basic.codeartifact-dev aws $CODEARTIFACT_TOKEN && poetry config http-basic.codeartifact-prod aws $CODEARTIFACT_TOKEN && aws codeartifact login --tool pip --repository dev --domain equipmentshare --domain-owner 696398453447'
 
 #############
 ### OTHER ###
@@ -116,3 +115,6 @@ source ~/code/sandbox/bin/activate
 
 # abstracted out into its own file, found on the interwebs
 source ~/.bash_prompt
+
+# added by rustup installer
+. "$HOME/.cargo/env"
