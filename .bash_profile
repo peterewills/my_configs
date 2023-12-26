@@ -33,6 +33,9 @@ alias ipdb='python -m ipdb -c continue'
 # really get used much, but I'm adding it here just in case.
 alias flake8='/Users/peterewills/.flake8_venv/bin/flake8'
 
+# dangling homebrew link that needs to be overwritten
+alias docker='/usr/local/bin/docker'
+
 list_versions () {
     # list the available versions of a python package. don't just do `pip install ==`
     # without a version number, because then it can install version 0.0 we assume that
@@ -84,6 +87,8 @@ HISTIGNORE="ls:ll:cd:pwd:bg:fg:history"
 HISTSIZE=100000
 HISTFILESIZE=10000000
 
+export DEV_ENV=true
+
 ########################
 # EQUIPMENTSHARE STUFF #
 ########################
@@ -93,6 +98,9 @@ HISTFILESIZE=10000000
 
 # the original pAuth includes poetry configuration. I'm not using this ATM, so I removed it.
 alias pAuth='export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain equipmentshare --domain-owner 696398453447 --query authorizationToken --output text) && poetry config http-basic.codeartifact-dev aws $CODEARTIFACT_TOKEN && poetry config http-basic.codeartifact-prod aws $CODEARTIFACT_TOKEN && aws codeartifact login --tool pip --repository dev --domain equipmentshare --domain-owner 696398453447'
+alias ecrLogin='aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 696398453447.dkr.ecr.us-west-2.amazonaws.com'
+
+alias docker_build_with_aws='docker build --build-arg CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain equipmentshare --domain-owner 696398453447 --query authorizationToken --output text)'
 
 #############
 ### OTHER ###

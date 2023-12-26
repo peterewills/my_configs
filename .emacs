@@ -287,6 +287,7 @@
   ;; invalid wrapping. Just use C-c C-c b to blacken the whole buffer if you want to
   ;; "wrap". For comments you can use M-q as usual.
   (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
+  (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode)))
   :custom
   (elpy-rpc-backend "jedi")
   (elpy-rpc-python-command "/opt/homebrew/bin/python3.8")
@@ -315,9 +316,8 @@
   :ensure nil
   :init
   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
-  ;; (package-generate-autoloads "ein" "/Users/peterwills/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
-  ;; (load-file
-  ;;  "/Users/peterewills/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
+  (package-generate-autoloads "ein" "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
+  (load-file "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
   :config
   ;; open files as ipython notebooks automagically
   (add-hook 'ein:ipynb-mode-hook 'ein:maybe-open-file-as-notebook)
