@@ -1,0 +1,8 @@
+{
+  "language": "snowflake",
+  "tabWidth": 2,
+  "keywordCase": "upper",
+  "dataTypeCase": "upper",
+  "functionCase": "upper",
+  "identifierCase": "lower",
+}

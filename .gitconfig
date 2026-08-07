@@ -13,12 +13,15 @@
 
 [push]
 	default = simple
+	autoSetupRemote = true
 
 [color]
 	ui = auto
 
 [github]
 	user = peterewills
+
+
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f

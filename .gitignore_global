@@ -7,7 +7,6 @@
 *.exe
 *.o
 *.so
-*.pdf
 *.pyc
 
 ####################
@@ -52,15 +51,23 @@
 ################
 # backup files #
 ################
-*#
+*.#*
 *~
+*.rej
 
 #############
 # tmp files #
 #############
 
 *tmp*
-*dev*
+
+########################
+# Virtual environments #
+########################
+
+**/venv/*
+**/env/*
+**/ENV/*
 
 ######################
 # OS generated files #
@@ -72,3 +79,33 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+
+##########
+# Claude #
+##########
+**/.claude/**
+**/PLAN-*.md
+**/docs/superpowers/**
+pickup.md
+plan.md
+
+################
+# Node modules #
+################
+**/node_modules/**
+
+#################
+# Build outputs #
+#################
+**/dist/
+
+#####################
+# CDK for Terraform #
+#####################
+**/.gen/
+**/cdktf.out/
+**/.terraform/
+**/.terraform.lock.hcl
+

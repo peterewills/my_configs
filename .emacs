@@ -50,6 +50,8 @@
  vc-follow-symlinks t
  pixel-scroll-mode t
 
+ debug-on-error t ;; for more informative error messages
+
  ;; exiting emacs
  confirm-kill-emacs 'yes-or-no-p
  confirm-kill-processes nil
@@ -72,6 +74,10 @@
 
 ;; save your place
 (save-place-mode 1)
+
+;; ensure typescript mode
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-ts-mode))
 
 ;; kill trailing whitespace on save
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
@@ -105,14 +111,9 @@
 ;; I should really think through where I want to put my binaries and get them
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
-(add-to-exec-path "/Users/peterewills/.local/bin")
+(add-to-exec-path "/Users/peter.wills@equipmentshare.com/.local/bin")
 (add-to-exec-path "/opt/homebrew/bin")
-(add-to-exec-path "/Users/peterewills/code/source/.venv/bin/")
-
-(add-to-exec-path "/Users/peterewills/.flake8_venv/bin")
-;; we prefix this to the path to guarantee that the python that gets used is the one
-;; defined by pyenv, not /usr/bin/python
-;; (prefix-to-exec-path "/Users/peterewills/.pyenv/shims")
+(add-to-exec-path "")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -144,7 +145,13 @@
 
 ;; I want these to work both in python mode and in EIN, so I'll just set them as
 ;; global. This way they can even work in org code snippets, or markdown, or whatever
-(global-set-key (kbd "C-c b b") 'python-black-buffer)
+(defun isort-then-black-buffer ()
+  "Run py-isort-buffer followed by python-black-buffer."
+  (interactive)
+  (py-isort-buffer)
+  (python-black-buffer))
+
+(global-set-key (kbd "C-c b b") 'isort-then-black-buffer)
 (global-set-key (kbd "C-c b r") 'python-black-region)
 
 ;; configure elisp mode
@@ -241,6 +248,9 @@
 ;; things might break. Too bad you can't pin to certain versions.
 (setq use-package-always-pin "melpa")
 
+(require 'treesit)
+(setq treesit-extra-load-path '("/Users/peter.wills@equipmentshare.com/code/personal/tree-sitter-module/dist"))
+
 ;; Since we have both melpa and melpa-stable in our package-archives, we
 ;; shouldn't just :ensure these things. Cause then we might get the nightly
 ;; github builds from melpa, instead of the releases from melpa-stable. So, if
@@ -261,6 +271,14 @@
   :bind
   ("C-=" . er/expand-region)
   ("C--" . er/contract-region))
+
+(use-package sqlformat
+  :init
+  (setq sqlformat-command 'sql-formatter)
+  (setq sqlformat-args '("-c /Users/peter.wills@equipmentshare.com/.config/my_configs/sqlformat-config.json"))
+  :bind
+  ("C-c s b" . sqlformat-buffer)
+  ("C-c s r" . sqlformat-region))
 
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet)
@@ -290,9 +308,9 @@
   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode)))
   :custom
   (elpy-rpc-backend "jedi")
-  (elpy-rpc-python-command "/opt/homebrew/bin/python3.8")
-  (python-shell-interpreter "/opt/homebrew/bin/python3.8")
-  (elpy-rpc-virtualenv-path 'default))
+  (elpy-rpc-python-command "/opt/homebrew/bin/python")
+  (python-shell-interpreter "/opt/homebrew/bin/python")
+  (elpy-rpc-virtualenv-path "/Users/peter.wills@equipmentshare.com/code/venvs/elpy"))
 
 (use-package python-black
   :demand t
@@ -312,30 +330,34 @@
 ;;
 ;; Leave the package-generate-autoloads call commented out unless you're acitvely
 ;; working on the code.
-(use-package ein
-  :ensure nil
-  :init
-  (add-hook 'ein:notebook-mode-hook 'jedi:setup)
-  (package-generate-autoloads "ein" "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
-  (load-file "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
-  :config
-  ;; open files as ipython notebooks automagically
-  (add-hook 'ein:ipynb-mode-hook 'ein:maybe-open-file-as-notebook)
-  :custom
-  (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
-  (ein:complete-on-dot t)
-  (ein:truncate-long-cell-output nil)
-  (ein:auto-save-on-execute t)
-  (ein:auto-black-on-execute t)
-  (ein:output-area-inlined-images t)
-  (ein:slice-image t)
-  (ein:urls "8888")
-  :bind
-  ("C-x M-w" . ein:notebook-save-to-command)
-  ("C-c C-x C-c" . ein:worksheet-clear-all-output)
-  ("C-c C-x C-k" . ein:nuke-and-pave)
-  ("C-c C-x C-f" . ein:new-notebook)
-  ("C-c b c" . ein:worksheet-python-black-cell))
+;; (use-package ein
+;;   :ensure nil
+;;   :init
+;;   (add-hook 'ein:notebook-mode-hook 'jedi:setup)
+;;   (package-generate-autoloads "ein" "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/")
+;;   (load-file
+;;    "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-autoloads.el")
+;;   (load-file
+;;    "/Users/peter.wills@equipmentshare.com/.emacs.d/lisp/emacs-ipython-notebook/lisp/ein-init.el")
+;;   :config
+;;   ;; open files as ipython notebooks automagically
+;;   (add-hook 'ein:ipynb-mode-hook 'ein:maybe-open-file-as-notebook)
+;;   :custom
+;;   (ein:completion-backend 'ein:use-ac-backend) ;; ac-jedi-backend doesn't work
+;;   (ein:complete-on-dot t)
+;;   (ein:truncate-long-cell-output nil)
+;;   (ein:auto-save-on-execute t)
+;;   (ein:auto-black-on-execute t)
+;;   (ein:output-area-inlined-images nil)
+;;   (ein:slice-image t)
+;;   (ein:urls "http://127.0.0.1:8888")
+;;   (ein:notebook-default-home-directory "/Users/peter.wills@equipmentshare.com")
+;;   :bind
+;;   ("C-x M-w" . ein:notebook-save-to-command)
+;;   ("C-c C-x C-c" . ein:worksheet-clear-all-output)
+;;   ("C-c C-x C-k" . ein:nuke-and-pave)
+;;   ("C-c C-x C-f" . ein:new-notebook)
+;;   ("C-c b c" . ein:worksheet-python-black-cell))
 
 ;; I like this for find-file and kill-buffer. It gets trumped by helm in a lot
 ;; of cases.
@@ -431,6 +453,27 @@
 (use-package nyan-mode
   :init (add-hook 'find-file-hook 'nyan-mode))
 
+(use-package tide
+  :ensure t
+  :init
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    ;; company is an optional dependency. You have to
+    ;; install it separately via package-install
+    ;; `M-x package-install [ret] company`
+    (company-mode +1))
+  :after ((company flycheck)
+          (remove-hook 'before-save-hook 'tide-format-before-save))
+  :hook ((typescript-ts-mode . setup-tide-mode)
+         (tsx-ts-mode . setup-tide-mode)
+         (typescript-ts-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+
 ;;;;;;;;;;;;;;
 ;; ORG MODE ;;
 ;;;;;;;;;;;;;;
@@ -503,5 +546,5 @@
 ;;;;;;;;;;;;;
 
 (load "~/secrets") ;; passwords can be stored in this file
-;; activate our sandbox venv by default
-(pyvenv-activate "/Users/peter.wills@equipmentshare.com/code/sandbox")
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
