@@ -23,8 +23,17 @@ alias ll='ls -alFh'
 export LS_ALL=en_US.utf-8
 export LANG=en_US.utf-8
 
-# Opens emacs in a separate window (so I have all my nice keybindings etc)
-alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs "$@"'
+# Opens files in the persistent emacs --daemon (see emacs.service, enabled via
+# systemctl --user). Reuses the existing window as a new buffer if one's
+# already open, rather than spawning a new one; only creates a new window if
+# none exists yet.
+emacs() {
+  if [ "$(emacsclient -e '(seq-some (function window-system) (frame-list))' 2>/dev/null)" != "nil" ]; then
+    emacsclient -n -a "" "$@"
+  else
+    emacsclient -n -c -a "" "$@"
+  fi
+}
 
 alias jupyter='python -m jupyter'
 alias poetry='python -m poetry'
@@ -185,6 +194,3 @@ source ~/.git-completion.bash
 
 # Tokens we don't want to push to GitHub :facepalm:
 source ~/.tokens
-
-# added by rustup installer
-. "$HOME/.cargo/env"

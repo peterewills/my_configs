@@ -45,7 +45,6 @@
  mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
  mouse-wheel-follow-mouse 't ;; scroll window under mouse
  scroll-step 1 ;; keyboard scroll one line at a time
- mac-command-modifier 'meta
  ring-bell-function 'ignore ;; no more annoying boop
  vc-follow-symlinks t
  pixel-scroll-mode t
@@ -111,9 +110,6 @@
 ;; I should really think through where I want to put my binaries and get them
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
-(add-to-exec-path "/Users/peter.wills@equipmentshare.com/.local/bin")
-(add-to-exec-path "/opt/homebrew/bin")
-(add-to-exec-path "")
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -214,7 +210,7 @@
 ;; ridiculous next to it. So, the question is, how can I set the default weight to light
 ;; and the bold stuff to medium weight? That would be optimal.
 (set-face-attribute 'default nil
-                    :height 145
+                    :height 100
                     :family "Fira Code Light"
                     :weight 'medium)
 ;;;;;;;;;;;;;;
@@ -248,9 +244,6 @@
 ;; things might break. Too bad you can't pin to certain versions.
 (setq use-package-always-pin "melpa")
 
-(require 'treesit)
-(setq treesit-extra-load-path '("/Users/peter.wills@equipmentshare.com/code/personal/tree-sitter-module/dist"))
-
 ;; Since we have both melpa and melpa-stable in our package-archives, we
 ;; shouldn't just :ensure these things. Cause then we might get the nightly
 ;; github builds from melpa, instead of the releases from melpa-stable. So, if
@@ -275,7 +268,7 @@
 (use-package sqlformat
   :init
   (setq sqlformat-command 'sql-formatter)
-  (setq sqlformat-args '("-c /Users/peter.wills@equipmentshare.com/.config/my_configs/sqlformat-config.json"))
+  (setq sqlformat-args '("-c /home/peter/code/my_configs/sqlformat-config.json"))
   :bind
   ("C-c s b" . sqlformat-buffer)
   ("C-c s r" . sqlformat-region))
@@ -308,9 +301,8 @@
   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode)))
   :custom
   (elpy-rpc-backend "jedi")
-  (elpy-rpc-python-command "/opt/homebrew/bin/python")
-  (python-shell-interpreter "/opt/homebrew/bin/python")
-  (elpy-rpc-virtualenv-path "/Users/peter.wills@equipmentshare.com/code/venvs/elpy"))
+  (elpy-rpc-python-command "/usr/bin/python3")
+  (python-shell-interpreter "/usr/bin/python3"))
 
 (use-package python-black
   :demand t
@@ -489,12 +481,8 @@
       ;; indent rather than showing all the stars
       org-startup-indented t
       org-hide-emphasis-markers t ;; don't show stars for bold, or whatever.
-      org-agenda-files (list "/Users/peterewills/org/work.org")
       org-image-actual-width nil ;; allow images to be resize
       )
-
-;; we want tex in our org stuffs! and it needs to not be tiny.
-(add-to-exec-path "/Library/TeX/texbin")
 
 (defun org-preview-all-latex-fragments ()
   "Preview all latex fragments in a buffer."
@@ -545,6 +533,6 @@
 ;; STARTUP ;;
 ;;;;;;;;;;;;;
 
-(load "~/secrets") ;; passwords can be stored in this file
+(load "~/secrets" t) ;; passwords can be stored in this file, if present
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)

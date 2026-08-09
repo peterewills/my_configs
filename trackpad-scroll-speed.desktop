@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Trackpad Scroll Speed Fix
+Comment=Slows trackpad scrolling by adjusting libinput Scrolling Pixel Distance
+Exec=/home/peter/code/my_configs/fix-trackpad-scroll-speed.sh
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
+Terminal=false

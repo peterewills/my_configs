@@ -1,0 +1,7 @@
+# Without this, creating ~/.inputrc disables all the default bindings that
+# normally come from /etc/inputrc.
+$include /etc/inputrc
+
+# Ctrl+Delete: delete word forward. GTK/GUI apps bind this natively; readline
+# doesn't by default, even though terminals do send an escape sequence for it.
+"\e[3;5~": kill-word
