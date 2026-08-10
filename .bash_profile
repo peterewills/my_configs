@@ -14,10 +14,14 @@ alias cdu='cd ..'
 alias cdb='cd -'
 alias ll='ls -alFh'
 
-# the true location of python 3.11 as installed by brew
-# NOTE: I just added symlinks in /usr/local/bin instead
-# alias python='/opt/homebrew/bin/python3'
-# alias pip='/opt/homebrew/bin/pip3'
+# the true location of python 3.14 as installed by brew
+alias python='/opt/homebrew/bin/python3'
+alias pip='/opt/homebrew/bin/pip3'
+
+# dev tools venv (jupyter, flake8, jedi, autopep8, yapf) - see README "Python" section.
+# elpy in .emacs points straight at this venv's interpreter; this just puts its
+# CLI tools (flake8, yapf, jupyter, ...) on PATH for shell use too.
+export PATH="$HOME/.venvs/tools/bin:$PATH"
 
 # make enconding work nicely with python 3
 export LS_ALL=en_US.utf-8
@@ -48,11 +52,6 @@ export JUPYTER_PATH=/opt/homebrew/share/jupyter
 
 alias awsclaude='CLAUDE_CODE_USE_BEDROCK=1 ANTHROPIC_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0 claude'
 alias claude='~/.local/bin/claude'
-
-# we have flake8 installed in a special virtual environment, so that it can be used
-# across all venvs. mostly this is just for use in emacs, so this alias probably won't
-# really get used much, but I'm adding it here just in case.
-alias flake8='/Users/peterewills/.flake8_venv/bin/flake8'
 
 # dangling homebrew link that needs to be overwritten
 alias docker='/usr/local/bin/docker'

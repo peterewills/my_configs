@@ -210,7 +210,7 @@
 ;; ridiculous next to it. So, the question is, how can I set the default weight to light
 ;; and the bold stuff to medium weight? That would be optimal.
 (set-face-attribute 'default nil
-                    :height 100
+                    :height 145
                     :family "Fira Code Light"
                     :weight 'medium)
 ;;;;;;;;;;;;;;
@@ -276,19 +276,21 @@
 ;; repo can be found at https://github.com/AndreaCrotti/yasnippet-snippets.git
 (use-package yasnippet)
 
-;; We have to add ~/.local/bin to the path so that elpy can see flake8, or any
-;; other python-based binaries which are installed via --user.
-
 ;; In our .emacs.d/lisp directory we have local clone of a fork, which I initially made
 ;; in order to mess around more with folding. I never put in the time to really get it
 ;; working smoothly; maybe just try using hideshow mode? It's been a while since I
 ;; messed with this.
 ;;
-;; For a fresh installation, you'll want to
+;; Modern Homebrew python refuses system-wide `pip install` (PEP 668), so elpy's
+;; jedi/flake8/autopep8/yapf live in a dedicated venv instead of --user site-packages:
 ;;
-;;   pip install flake8 jedi autopep8 yapf
+;;   python3 -m venv ~/.venvs/tools
+;;   ~/.venvs/tools/bin/pip install jupyter flake8 jedi autopep8 yapf
 ;;
-;; This should get you full Elpy bells & whistles.
+;; elpy-rpc-python-command and python-shell-interpreter below point straight at that
+;; venv's interpreter, so no PATH shenanigans are needed for elpy itself. The venv's
+;; bin/ is also added to PATH in .bash_profile, so flake8/yapf/jupyter work from the
+;; shell too.
 (use-package elpy
   :init
   (elpy-enable)
@@ -301,8 +303,8 @@
   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode)))
   :custom
   (elpy-rpc-backend "jedi")
-  (elpy-rpc-python-command "/usr/bin/python3")
-  (python-shell-interpreter "/usr/bin/python3"))
+  (elpy-rpc-python-command "~/.venvs/tools/bin/python3")
+  (python-shell-interpreter "~/.venvs/tools/bin/python3"))
 
 (use-package python-black
   :demand t
