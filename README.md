@@ -109,8 +109,13 @@ keyboard shortcut manually. The "Action" you want to link this to is
 
 ### Default Keybindings
 
-These are nice - get emacs-like text motions in (some) macOS apps, like
-Messages, Slack, etc. Do
+These are nice - get emacs-like text motions in AppKit-based macOS apps. That
+covers most things: Mail, Notes, TextEdit, Reminders, Calendar, Freeform, and
+Electron apps like Slack (Electron hosts its text in an `NSView`, so it goes
+through the same AppKit machinery). It does **not** cover Mac Catalyst apps
+(Messages, Maps, Podcasts, ...) - those are UIKit, never read
+`~/Library/KeyBindings`, and only support a hardcoded subset (`^a`, `^e`, `^k`,
+`^d`). No fix for those; live with it. Do
 
 ```
 mkdir ~/Library/KeyBindings

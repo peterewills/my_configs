@@ -115,6 +115,18 @@
 ;;; GENERAL KEY BINDINGS ;;;
 ;;;;;;;;;;;;;;::;;;;;;;;;;;;
 
+;; On macOS the NS build defaults to Command=super, Option=meta, and binds s-q to
+;; save-buffers-kill-emacs -- so Cmd-q quits instead of filling a paragraph. Swap
+;; them: Command becomes Meta (Cmd-q is M-q, Cmd-w is M-w, ...), Option becomes
+;; super. This gives up the mac Cmd-c/Cmd-v shortcuts inside emacs.
+(when (eq system-type 'darwin)
+  (setq mac-command-modifier 'meta
+        ns-command-modifier 'meta
+        ns-right-command-modifier 'meta
+        mac-option-modifier 'super
+        ns-option-modifier 'super
+        ns-right-option-modifier 'super))
+
 ;; global bindings to comment and uncomment regions
 (global-set-key [?\C-x ?\C-/] 'comment-region)
 (global-set-key [?\C-x ?\C-.] 'uncomment-region)
