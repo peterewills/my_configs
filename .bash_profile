@@ -1,3 +1,7 @@
+# The following lines were added by Docker Desktop to add commands to your PATH.
+export PATH="$PATH:/Users/peter/.docker/bin"
+# End of Docker Desktop section.
+
 ############################
 ### PETER'S BASH PROFILE ###
 ############################
@@ -54,7 +58,7 @@ alias awsclaude='CLAUDE_CODE_USE_BEDROCK=1 ANTHROPIC_MODEL=us.anthropic.claude-s
 alias claude='~/.local/bin/claude'
 
 # dangling homebrew link that needs to be overwritten
-alias docker='/usr/local/bin/docker'
+# alias docker='/usr/local/bin/docker'
 
 list_versions () {
     # list the available versions of a python package. don't just do `pip install ==`
@@ -193,3 +197,7 @@ source ~/.git-completion.bash
 
 # Tokens we don't want to push to GitHub :facepalm:
 source ~/.tokens
+
+# direnv: per-directory env, e.g. ~/code/alloy/.envrc selects the Alloy gh account.
+# Last, so it appends to the PROMPT_COMMAND set above.
+eval "$(direnv hook bash)"

@@ -59,10 +59,13 @@
  custom-file (make-temp-file "emacs-custom"))
 
 ;; use -default when variables are buffer-local
-(setq-default truncate-lines t ;; truncate rather than wrap lines
-              auto-fill-function 'do-auto-fill ;; automatically fill lines everywhere
-              indent-tabs-mode nil ;; use spaces
-              fill-column 88) ;; PEP8 >_<
+(setq-default indent-tabs-mode nil ;; use spaces
+              fill-column 120) ;; only matters for explicit M-q
+;; black's line length, so M-q wraps comments and docstrings (which black leaves alone)
+(add-hook 'python-mode-hook (lambda () (setq fill-column 88)))
+
+;; don't hard-wrap anything; soft-wrap long lines at word boundaries instead
+(global-visual-line-mode 1)
 
 ;; Default shell in term
 (setq-default shell-file-name "/bin/bash")
@@ -110,6 +113,9 @@
 ;; I should really think through where I want to put my binaries and get them
 ;; all in one place...
 (add-to-exec-path "/usr/local/bin")
+(add-to-exec-path "/opt/homebrew/bin") ;; Apple-silicon Homebrew (pandoc, etc.)
+;; python tools venv (see the elpy section): ruff/flake8 for python-flymake, black/isort
+(add-to-exec-path (expand-file-name "~/.venvs/tools/bin"))
 
 ;;;;;;;;;;;;::;;;;;;;;;;;;;;
 ;;; GENERAL KEY BINDINGS ;;;
@@ -131,8 +137,15 @@
 (global-set-key [?\C-x ?\C-/] 'comment-region)
 (global-set-key [?\C-x ?\C-.] 'uncomment-region)
 
-;; quick toggle for auto-fill mode, sometimes I don't want it
+;; auto-fill is off globally; this toggles it on per-buffer if I want hard wrapping
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
+
+;; inverse of M-q, invoked via M-x (Cmd-Shift-q is eaten by macOS quit)
+(defun unfill-paragraph (&optional region)
+  "Turn a hard-wrapped paragraph (or region) back into a single line."
+  (interactive (progn (barf-if-buffer-read-only) (list t)))
+  (let ((fill-column most-positive-fixnum))
+    (fill-paragraph nil region)))
 (global-set-key (kbd "C-c e") 'electric-pair-mode)
 
 ;; I use this one so much that I wanted to make it easier
@@ -154,9 +167,16 @@
 ;; I want these to work both in python mode and in EIN, so I'll just set them as
 ;; global. This way they can even work in org code snippets, or markdown, or whatever
 (defun isort-then-black-buffer ()
-  "Run py-isort-buffer followed by python-black-buffer."
+  "Run py-isort-buffer followed by python-black-buffer.
+py-isort sorts a copy in /tmp, so point isort at the nearest pyproject.toml; without it,
+the project's own package is sorted as third-party."
   (interactive)
-  (py-isort-buffer)
+  (let* ((root (locate-dominating-file default-directory "pyproject.toml"))
+         (py-isort-options
+          (append py-isort-options
+                  (when root
+                    (list (concat "--settings-path=" (expand-file-name root)))))))
+    (py-isort-buffer))
   (python-black-buffer))
 
 (global-set-key (kbd "C-c b b") 'isort-then-black-buffer)
@@ -222,7 +242,7 @@
 ;; ridiculous next to it. So, the question is, how can I set the default weight to light
 ;; and the bold stuff to medium weight? That would be optimal.
 (set-face-attribute 'default nil
-                    :height 145
+                    :height 160 ;; tenths of a point, i.e. 16pt
                     :family "Fira Code Light"
                     :weight 'medium)
 ;;;;;;;;;;;;;;
@@ -270,7 +290,7 @@
 
 (use-package diminish
   :init
-  (diminish 'auto-fill-function))
+  (diminish 'visual-line-mode))
 
 (use-package expand-region
   :bind
@@ -297,24 +317,23 @@
 ;; jedi/flake8/autopep8/yapf live in a dedicated venv instead of --user site-packages:
 ;;
 ;;   python3 -m venv ~/.venvs/tools
-;;   ~/.venvs/tools/bin/pip install jupyter flake8 jedi autopep8 yapf
+;;   ~/.venvs/tools/bin/pip install jupyter flake8 jedi autopep8 yapf black isort ruff
 ;;
 ;; elpy-rpc-python-command and python-shell-interpreter below point straight at that
 ;; venv's interpreter, so no PATH shenanigans are needed for elpy itself. The venv's
 ;; bin/ is also added to PATH in .bash_profile, so flake8/yapf/jupyter work from the
-;; shell too.
+;; shell too, and to exec-path near the top of this file, so python-flymake, black
+;; and isort find their executables in GUI Emacs.
 (use-package elpy
   :init
   (elpy-enable)
   (add-hook 'elpy-mode-hook (lambda () (diminish 'highlight-indentation-mode)))
   (add-hook 'elpy-mode-hook (lambda () (hs-minor-mode)))
-  ;; turn off auto-fill-mode in python environments - it ends up doing syntactically
-  ;; invalid wrapping. Just use C-c C-c b to blacken the whole buffer if you want to
-  ;; "wrap". For comments you can use M-q as usual.
-  (add-hook 'python-mode-hook (lambda () (auto-fill-mode -1)))
   (add-hook 'python-mode-hook (lambda () (sphinx-doc-mode)))
   :custom
   (elpy-rpc-backend "jedi")
+  ;; match black: 88-char lines, and drop the two checks black's own formatting trips
+  (elpy-syntax-check-command "flake8 --max-line-length=88 --extend-ignore=E203,W503")
   (elpy-rpc-python-command "~/.venvs/tools/bin/python3")
   (python-shell-interpreter "~/.venvs/tools/bin/python3"))
 
@@ -323,7 +342,9 @@
   :after python)
 
 (use-package py-isort
-  :after python)
+  :after python
+  :custom
+  (py-isort-options '("--profile=black")))
 
 (use-package sphinx-doc
   :after python)
@@ -448,7 +469,10 @@
   (global-set-key (kbd "C-x C-j") 'jedi:setup))
 
 (use-package markdown-mode
-  :custom (markdown-enable-math t))
+  ;; C-c C-c p renders the buffer to a temp HTML file and opens it in the browser.
+  ;; Needs pandoc on PATH (brew install pandoc). -f gfm so tables render.
+  :custom
+  (markdown-command "pandoc -f gfm -t html5 --standalone"))
 
 (use-package thrift
   :custom (thrift-indent-level 4))
