@@ -1,0 +1,15 @@
+# Loaded for repos under ~/code/alloy via includeIf in .gitconfig.
+# Alloy-Mining-Intelligence requires verified signatures on main; the signing key is
+# registered on alloy-pwills, whose verified email must match user.email.
+[user]
+	email = peter.wills@alloymining.ai
+	signingkey = ~/.ssh/id_ed25519_alloy.pub
+
+[gpg]
+	format = ssh
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgsign = true
