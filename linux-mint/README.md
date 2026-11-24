@@ -82,6 +82,24 @@ escape sequence for it. This binds `\e[3;5~` to `kill-word`. Includes
 `$include /etc/inputrc` at the top - required, otherwise creating `~/.inputrc`
 silently drops all of readline's normal default bindings.
 
+### Terminal copy/paste keybindings
+
+Since Command is aliased to Control above, physical Cmd+V/Cmd+C send plain
+Ctrl+V/Ctrl+C - but gnome-terminal reserves Ctrl+C for SIGINT, and its stock
+paste shortcut is Ctrl+Shift+V, not Ctrl+V. Rebound both via dconf (not
+captured as a file - just a dconf key under `org.gnome.Terminal.Legacy.Keybindings`,
+re-run if it ever resets):
+
+```
+dconf write /org/gnome/terminal/legacy/keybindings/paste "'<Primary>y'"
+dconf write /org/gnome/terminal/legacy/keybindings/copy "'<Primary><Shift>c'"
+```
+
+`copy` previously collided with `close-tab` (both on Ctrl+W) - moved off it
+to Ctrl+Shift+C instead. `paste` is on Ctrl+Y rather than the stock
+Ctrl+Shift+V; right-click "Paste" still works as a second option regardless
+of this binding.
+
 ### Ctrl+Space opens the Cinnamon menu (Spotlight-style)
 
 ```
