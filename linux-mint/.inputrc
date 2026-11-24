@@ -5,3 +5,8 @@ $include /etc/inputrc
 # Ctrl+Delete: delete word forward. GTK/GUI apps bind this natively; readline
 # doesn't by default, even though terminals do send an escape sequence for it.
 "\e[3;5~": kill-word
+
+# Ctrl+Backspace: delete word backward. gnome-terminal sends plain ^H (0x08,
+# no escape prefix) for this, same as legacy Backspace, which readline's
+# default /etc/inputrc binds to backward-delete-char. Override it here.
+"\C-h": backward-kill-word
